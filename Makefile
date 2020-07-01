@@ -1,7 +1,7 @@
 include ./lib-makefiles/integrity.mk
 include ./lib-makefiles/docker.mk
 
-# when you clone the repository, make sure the submodules are cloned as well. git submodules init && git submodules update should do the trick.
+# when you clone the repository, make sure the submodules are cloned as well. git submodule update --init --recursive should do the trick.
 
 SHELL = /bin/bash
 
@@ -70,6 +70,8 @@ help:
 	@echo " \033[1mDOCKER TOOLS TARGETS\033[0m "
 	@echo "- build                        Build a target with the current commit tag. If the git repository is not 'clean', the tag will be 'unstable'"
 	@echo "- push                         Push the container to docker hub with the current commit tag"
+	@echo " \033[1mTESTS TARGETS\033[0m "
+	@echo "- test                         Run the unit and integration tests"
 	@echo " \033[1mCLEANING TARGETS\033[0m "
 	@echo "- clean                        Clean genereated files"
 	@echo "- clean_venv                   Clean python venv"
