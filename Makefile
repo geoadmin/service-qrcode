@@ -8,7 +8,7 @@ SHELL = /bin/bash
 .DEFAULT_GOAL := help
 
 ORGNAME := swisstopo
-SERVICE_QR_CODE_HTTP_PORT := XXXX # TODO: define the port
+SERVICE_QR_CODE_HTTP_PORT := 2741
 
 CURRENT_DIR := $(shell pwd)
 INSTALL_DIR := $(CURRENT_DIR)/.venv
@@ -135,7 +135,7 @@ push: build
 
 .PHONY: dockerserve
 dockerserve: build
-	$(MAKO_CMD) --var app_tag=$(call commit_tags) --var app_port=XXXX docker-compose.yml.in > docker-compose.yml
+	$(MAKO_CMD) --var app_tag=$(call commit_tags) --var app_port=$(SERVICE_QR_CODE_HTTP_PORT) docker-compose.yml.in > docker-compose.yml
 	docker-compose up -d;
 	sleep 10
 

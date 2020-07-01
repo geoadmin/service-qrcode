@@ -28,7 +28,7 @@ COPY "./" "/service_qr_code/app/"
 RUN chown -R geoadmin:geoadmin /service_qr_code/app
 USER geoadmin
 
-EXPOSE XXXX
+EXPOSE 2741
 
 # Use a real WSGI server
 ENTRYPOINT ["python3", "wsgi.py"]
