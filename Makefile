@@ -12,13 +12,13 @@ SERVICE_QR_CODE_HTTP_PORT := 2741
 
 CURRENT_DIR := $(shell pwd)
 INSTALL_DIR := $(CURRENT_DIR)/.venv
-PYTHON_FILES := $(shell find api_diemo/* -type f -name "*.py" -print)
+PYTHON_FILES := $(shell find ./* -type f -name "*.py" -print)
 
 #FIXME: put this variable in config file
 PYTHON_VERSION=3.7.4
 CURRENT_PYTHON_VERSION := $(shell python3 -c "import sys;t='{v[0]}.{v[1]}.{v[2]}'.format(v=list(sys.version_info[:]));sys.stdout.write(t)")
 PYTHON_VERSION_OK := $(shell python3 -c "import sys; t=sys.version_info[0:3]; print(int('{}.{}.{}'.format(*t) == '$(PYTHON_VERSION)'))")
-BRANCH : = $(shell git status | grep "On branch" | sed -n -e 's/On branch //p')
+BRANCH := $(shell git status | grep "On branch" | sed -n -e 's/On branch //p')
 
 # Commands
 SYSTEM_PYTHON_CMD := $(shell which python3)
@@ -57,29 +57,29 @@ help:
 	@echo "Usage: make <target>"
 	@echo
 	@echo "Possible targets:"
-	@echo " \033[1mBUILD TARGETS\033[0m "
-	@echo "- setup                        Create the python virtual environment"
-	@echo " \033[1mLINTING TOOLS TARGETS\033[0m "
-	@echo "- lint                         Lint the python source code"
-	@echo "- autolint                     Autloint the python source code"
-	@echo " \033[1mLOCAL SERVER TARGETS\033[0m "
-	@echo "- serve                        Run the project using the flask debug server"
-	@echo "- gunicornserve                Run the project using the gunicorn WSGI server"
-	@echo "- dockerserve                  Run the project using the gunicorn WSGI server inside a container"
-	@echo "- shutdown                     Stop the aforementioned container"
-	@echo " \033[1mDOCKER TOOLS TARGETS\033[0m "
-	@echo "- build                        Build a target with the current commit tag. If the git repository is not 'clean', the tag will be 'unstable'"
-	@echo "- push                         Push the container to docker hub with the current commit tag"
-	@echo " \033[1mTESTS TARGETS\033[0m "
-	@echo "- test                         Run the unit and integration tests"
-	@echo " \033[1mCLEANING TARGETS\033[0m "
-	@echo "- clean                        Clean genereated files"
-	@echo "- clean_venv                   Clean python venv"
+	@echo -e " \033[1mBUILD TARGETS\033[0m "
+	@echo "- setup			Create the python virtual environment"
+	@echo -e " \033[1mLINTING TOOLS TARGETS\033[0m "
+	@echo "- lint			Lint the python source code"
+	@echo "- autolint		Autloint the python source code"
+	@echo -e " \033[1mLOCAL SERVER TARGETS\033[0m "
+	@echo "- serve			Run the project using the flask debug server"
+	@echo "- gunicornserve		Run the project using the gunicorn WSGI server"
+	@echo "- dockerserve		Run the project using the gunicorn WSGI server inside a container"
+	@echo "- shutdown		Stop the aforementioned container"
+	@echo -e " \033[1mDOCKER TOOLS TARGETS\033[0m "
+	@echo "- build			Build a target with the current commit tag. If the git repository is not 'clean', the tag will be 'unstable'"
+	@echo "- push			Push the container to docker hub with the current commit tag"
+	@echo -e " \033[1mTESTS TARGETS\033[0m "
+	@echo "- test			Run the unit and integration tests"
+	@echo -e " \033[1mCLEANING TARGETS\033[0m "
+	@echo "- clean			Clean genereated files"
+	@echo "- clean_venv		Clean python venv"
 
 # Build targets. Calling setup is all that is needed for the local files to be installed as needed. Bundesnetz may cause problem.
 
 python: build/python
-    @echo "Python installed"
+	@echo "Python installed"
 
 .PHONY: setup
 setup: python .venv/build.timestamp
@@ -91,9 +91,9 @@ local/bin/python3.7:
 	cd $(CURRENT_DIR)/local && tar -xf Python-$(PYTHON_VERSION).tar.xz && Python-$(PYTHON_VERSION)/configure --prefix=$(CURRENT_DIR)/local/ && make altinstall
 
 .venv/build.timestamp: build/python
-    $(SYSTEM_PYTHON_CMD) -m venv $(INSTALL_DIR) && ${PIP_CMD} install --upgrade pip setuptools
-    ${PIP_CMD} install requirements.txt
-    touch .venv/build.timestamp
+	$(SYSTEM_PYTHON_CMD) -m venv $(INSTALL_DIR) && ${PIP_CMD} install --upgrade pip setuptools
+	${PIP_CMD} install requirements.txt
+	touch .venv/build.timestamp
 
 # linting tools. Useful for commit hooks and making sure coding conventions are respected.
 
@@ -108,7 +108,7 @@ autolint: .venv/build.timestamp
 # Serve targets. Using these will run the application on your local machine. You can either serve with a wsgi front (like it would be within the container), or without.
 .PHONY: serve
 serve: .venv/build.timestamp
-        FLASK_APP=service_qrcode FLASK_DEBUG=1 ${FLASK_CMD} run --host=0.0.0.0 --port=${SERVICE_QR_CODE_HTTP_PORT}
+		FLASK_APP=service_qrcode FLASK_DEBUG=1 ${FLASK_CMD} run --host=0.0.0.0 --port=${SERVICE_QR_CODE_HTTP_PORT}
 
 .PHONY: gunicornserve
 gunicornserve: .venv/build.timestamp
@@ -127,7 +127,7 @@ test:
 
 .PHONY: build
 build:
-    $(call dockerbuild,./,service-qr-code,$(call commit_tags))
+	$(call dockerbuild,./,service-qr-code,$(call commit_tags))
 
 .PHONY: push
 push: build
@@ -157,23 +157,23 @@ clean_venv:
 
 .PHONY: deploy
 deploy:
-    ifeq ($(BRANCH),"develop")
-        deploy-dev
-    else ifeq ($(BRANCH),"master")
-        deploy-prod
-    else ifeq ($(findstring("release",$(BRANCH))), "release")
-        deploy-int
-    else
-        @echo "no deploy on personal branches"
-    endif
+ifeq ($(BRANCH),"develop")
+	deploy-dev
+else ifeq ($(BRANCH),"master")
+	deploy-prod
+else ifeq ($(findstring("release",$(BRANCH))), "release")
+	deploy-int
+else
+	@echo "no deploy on personal branches"
+endif
 
 deploy-dev:
-    @echo "When all is said and done, this should deploy the service to dev"
+	@echo "When all is said and done, this should deploy the service to dev"
 
 deploy-int:
-    @echo "When all is said and done, this should deploy the service to int"
+	@echo "When all is said and done, this should deploy the service to int"
 
 deploy-prod:
-    @echo "When all is said and done, this should deploy the service to prod"
+	@echo "When all is said and done, this should deploy the service to prod"
 
 
