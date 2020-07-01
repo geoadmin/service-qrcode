@@ -135,6 +135,7 @@ push: build
 
 .PHONY: dockerserve
 dockerserve: build
+	$(MAKO_CMD) --var app_tag=$(call commit_tags) --var app_port=XXXX docker-compose.yml.in > docker-compose.yml
 	docker-compose up -d;
 	sleep 10
 
