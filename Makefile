@@ -8,7 +8,7 @@ SHELL = /bin/bash
 .DEFAULT_GOAL := help
 
 ORGNAME := swisstopo
-SERVICE_QR_CODE_HTTP_PORT := 2741
+SERVICE_QR_CODE_HTTP_PORT := 8080
 
 CURRENT_DIR := $(shell pwd)
 INSTALL_DIR := $(CURRENT_DIR)/.venv
@@ -18,19 +18,17 @@ PYTHON_FILES := $(shell find ./* -type f -name "*.py" -print)
 PYTHON_VERSION=3.7.4
 CURRENT_PYTHON_VERSION := $(shell python3 -c "import sys;t='{v[0]}.{v[1]}.{v[2]}'.format(v=list(sys.version_info[:]));sys.stdout.write(t)")
 PYTHON_VERSION_OK := $(shell python3 -c "import sys; t=sys.version_info[0:3]; print(int('{}.{}.{}'.format(*t) == '$(PYTHON_VERSION)'))")
-BRANCH := $(shell git status | grep "On branch" | sed -n -e 's/On branch //p')
 
 # Commands
 SYSTEM_PYTHON_CMD := $(shell which python3)
 PYTHON_CMD := $(INSTALL_DIR)/bin/python3
 PIP_CMD := $(INSTALL_DIR)/bin/pip3
 FLASK_CMD := $(INSTALL_DIR)/bin/flask
-PYPI_URL ?= https://pypi.org/simple/
 FLAKE8_CMD := $(INSTALL_DIR)/bin/flake8
 AUTOPEP8_CMD := $(INSTALL_DIR)/bin/autopep8
 MAKO_CMD := $(INSTALL_DIR)/bin/mako-render
 NOSE_CMD := $(INSTALL_DIR)/bin/nosetests
-COVERAGE_CMD := $(INSTALL_DIR)/bin/coverage
+# COVERAGE_CMD := $(INSTALL_DIR)/bin/coverage
 all: help
 
 # This bit check define the build/python "target": if the system has an acceptable version of python, there will be no need to install python locally.
@@ -154,27 +152,5 @@ clean: clean_venv
 clean_venv:
 	rm -rf ${INSTALL_DIR};
 
-# DEPLOY placeholders.
-
-.PHONY: deploy
-deploy:
-ifeq ($(BRANCH),"develop")
-	deploy-dev
-else ifeq ($(BRANCH),"master")
-	deploy-prod
-else ifeq ($(findstring("release",$(BRANCH))), "release")
-	deploy-int
-else
-	@echo "no deploy on personal branches"
-endif
-
-deploy-dev:
-	@echo "When all is said and done, this should deploy the service to dev"
-
-deploy-int:
-	@echo "When all is said and done, this should deploy the service to int"
-
-deploy-prod:
-	@echo "When all is said and done, this should deploy the service to prod"
 
 
