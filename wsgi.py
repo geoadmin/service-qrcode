@@ -4,10 +4,6 @@ from gunicorn.app.base import BaseApplication
 from app import app as application
 
 
-def number_of_workers():
-    return (multiprocessing.cpu_count() * 2) + 1
-
-
 class StandaloneApplication(BaseApplication):
 
     def __init__(self, app, options=None):
@@ -30,7 +26,7 @@ if __name__ == '__main__':
     options = {
         'bind': '%s:%s' % ('0.0.0.0', SERVICE_QR_CODE_HTTP_PORT),
         'worker_class': 'gevent',
-        'workers': number_of_workers(),
+        'workers': 2,
         'timeout': 60,
     }
     StandaloneApplication(application, options).run()
