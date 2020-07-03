@@ -45,7 +45,7 @@ build/python:
 		touch build/python;
 else
 build/python: local/bin/python3.7
-    mkdir -p build
+	mkdir -p build
 	touch build/python;
 
 SYSTEM_PYTHON_CMD := $(CURRENT_DIR)/local/bin/python3.7
