@@ -18,17 +18,17 @@ RUN apt-get update && apt-get install apt-utils \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /service_qr_code/app
-COPY "./requirements.txt" "/service_qr_code/app/requirements.txt"
+WORKDIR /app
+COPY "./requirements.txt" "/app/requirements.txt"
 
 RUN pip3 install -r requirements.txt
 
-COPY "./" "/service_qr_code/app/"
+COPY "./" "/app/"
 
 RUN chown -R geoadmin:geoadmin /service_qr_code/app
 USER geoadmin
 
-EXPOSE 2741
+EXPOSE 8080
 
 # Use a real WSGI server
 ENTRYPOINT ["python3", "wsgi.py"]
