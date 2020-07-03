@@ -34,4 +34,4 @@ phases:
     commands:
       - make test
       - make push
-      - make deploy
+
