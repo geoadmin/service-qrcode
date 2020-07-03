@@ -118,8 +118,8 @@ gunicornserve: .venv/build.timestamp
 # TODO: once tests are imlpemented, we need the right files here.
 .PHONY: test
 test:
-	${NOSE_CMD} api_diemo/tests/unit_tests/something.py
-	${NOSE_CMD} api_diemo/tests/integration_tests/something.py
+	@echo -e "${NOSE_CMD} api_diemo/tests/unit_tests/something.py"
+	@echo -e "${NOSE_CMD} api_diemo/tests/integration_tests/something.py"
 
 # Docker related functions. Build and push are self explanatory (might require a docker login for push). Docker serve
 # has the same expected comportment as gunicornserve, but inside a container, while docker docker_shutdown provides an
