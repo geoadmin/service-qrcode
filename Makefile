@@ -23,7 +23,7 @@ BRANCH := $(shell git status | grep "On branch" | sed -n -e 's/On branch //p')
 # Commands
 SYSTEM_PYTHON_CMD := $(shell which python3)
 PYTHON_CMD := $(INSTALL_DIR)/bin/python3
-PIP_CMD := $(INSTALL_DIR)/bin/pip
+PIP_CMD := $(INSTALL_DIR)/bin/pip3
 FLASK_CMD := $(INSTALL_DIR)/bin/flask
 PYPI_URL ?= https://pypi.org/simple/
 FLAKE8_CMD := $(INSTALL_DIR)/bin/flake8
@@ -45,6 +45,7 @@ build/python:
 		touch build/python;
 else
 build/python: local/bin/python3.7
+    mkdir -p build
 	touch build/python;
 
 SYSTEM_PYTHON_CMD := $(CURRENT_DIR)/local/bin/python3.7
@@ -91,8 +92,8 @@ local/bin/python3.7:
 	cd $(CURRENT_DIR)/local && tar -xf Python-$(PYTHON_VERSION).tar.xz && Python-$(PYTHON_VERSION)/configure --prefix=$(CURRENT_DIR)/local/ && make altinstall
 
 .venv/build.timestamp: build/python
-	$(SYSTEM_PYTHON_CMD) -m venv $(INSTALL_DIR) && ${PIP_CMD} install --upgrade pip setuptools
-	${PIP_CMD} install requirements.txt
+	$(SYSTEM_PYTHON_CMD) -m venv $(INSTALL_DIR) && $(PIP_CMD) install --upgrade pip setuptools
+	$(PIP_CMD) install -r requirements.txt
 	touch .venv/build.timestamp
 
 # linting tools. Useful for commit hooks and making sure coding conventions are respected.
