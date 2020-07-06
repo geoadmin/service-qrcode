@@ -23,7 +23,7 @@ That's it, you're ready to work.
 
 ### Test your work
 
-Testing if what you developed work is made simple. You have four targets at your disposal. **test, serve, gunicornserve, dockerserve**
+Testing if what you developed work is made simple. You have four targets at your disposal. **test, serve, gunicornserve, dockerrun**
 
     make test
 
@@ -37,7 +37,7 @@ This will serve the application through Flask without any wsgi in front.
     
 This will serve the application with the Gunicorn layer in front of the application
     
-    make dockerserve
+    make dockerrun
 
 This will serve the application with the wsgi server, inside a container. 
 To stop serving through containers, 
@@ -108,4 +108,4 @@ When creating a PR, terraform should run a codebuild job to test, build and push
 
 This service is to be delployed to the Kubernetes cluster once it is merged.
 
-TO DO: give instructions (and hopefully: create **make** targets) to deploy to kubernetes.
+TO DO: give instructions to deploy to kubernetes.
