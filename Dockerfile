@@ -1,22 +1,13 @@
 # Buster slim base image.
-FROM debian:buster-slim
-MAINTAINER Swisstopo
+FROM python:3.7-slim-buster
 
 RUN groupadd -r geoadmin && useradd -r -s /bin/false -g geoadmin geoadmin
 
 
-# TODO : add relevant packages
-RUN apt-get update && apt-get install apt-utils \
-  ; DEBIAN_FRONTEND=noninteractive apt-get install -y --upgrade ca-certificates \
-  ; DEBIAN_FRONTEND=noninteractive apt-get install -y -o Dpkg::Options::="--force-confold" \
-  bash \
-  curl \
-  g++ \
-  make \
-  python3.7-minimal \
-  python3-pip \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+# HERE : install relevant packages
+# RUN apt-get update && apt-get install -y [packages] \
+#  && apt-get clean \
+#  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY "./requirements.txt" "/app/requirements.txt"

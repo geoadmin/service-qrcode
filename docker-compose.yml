@@ -1,6 +1,6 @@
 version: '2'
 services:
   app:
-    image: swisstopo/service-diemo:${app_tag}
+    image: swisstopo/service-diemo:local
     ports:
       - '8080:8080'
