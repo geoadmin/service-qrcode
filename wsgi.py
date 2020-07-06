@@ -22,9 +22,9 @@ class StandaloneApplication(BaseApplication):
 
 
 if __name__ == '__main__':
-    SERVICE_QR_CODE_HTTP_PORT = str(os.environ.get('SERVICE_QR_CODE_HTTP_PORT'))
+    HTTP_PORT = str(os.environ.get('HTTP_PORT'), "8080")
     options = {
-        'bind': '%s:%s' % ('0.0.0.0', SERVICE_QR_CODE_HTTP_PORT),
+        'bind': '%s:%s' % ('0.0.0.0', HTTP_PORT),
         'worker_class': 'gevent',
         'workers': 2,
         'timeout': 60,
