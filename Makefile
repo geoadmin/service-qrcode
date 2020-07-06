@@ -23,7 +23,7 @@ all: help
 
 ifeq ($(PYTHON_VERSION_OK),1)
 PYTHON_BINDIR := $(shell dirname $(PYTHON_CMD))
-PYTHONHOME :=$(shell eval "cd $(PYTHON_BINDIR); pwd; cd > /dev/null")
+PYTHONHOME := $(shell eval "cd $(PYTHON_BINDIR); pwd; cd > /dev/null")
 build/python:
 		@echo $(CURRENT_PYTHON_VERSION)
 		@echo $(shell $(PYTHON_CMD) -c "print('OK')")

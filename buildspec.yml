@@ -31,8 +31,6 @@ phases:
       - echo CODEBUILD_SOURCE_REPO_URL=${CODEBUILD_SOURCE_REPO_URL}
       - echo COMMIT_HASH=${COMMIT_HASH}
       - echo GITHUB_BRANCH=${GITHUB_BRANCH}
-      - echo trying git describe
-      - git describe
   pre_build:
     commands:
       - echo "export of the image tag for build and push purposes"
@@ -41,6 +39,8 @@ phases:
       - make clean setup
   build:
     commands:
+      - echo we need to tag the image correctly, and this should depend on the branch it's from, and / or the branch
+      - echo it's merged into.
       - docker build -t ${IMAGE_BASE_NAME}:${IMAGE_TAG} .
   post_build:
     commands:
