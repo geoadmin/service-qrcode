@@ -2,10 +2,9 @@ version: 0.2
 
 env:
   variables:
-    IMAGE_BASE_NAME: 'swisstopo/service-qr-code'
+    IMAGE_BASE_NAME: 'swisstopo/service-qrcode'
     SHELL: /bin/bash
     AWS_DEFAULT_REGION: eu-central-1
-    ORGNAME: "swisstopo"
     USER: "aws_code_build"
   parameter-store:
     CI_DOCKERHUB_USER: "/dockerhub/user"
@@ -18,20 +17,19 @@ phases:
     commands:
       - echo "Installing necessary softwares"
       - docker login -u ${CI_DOCKERHUB_USER} -p ${CI_DOCKERHUB_PASSWORD}
-      - apt-get update && apt-get install -y docker-compose
+      - apt-get update && apt-get install -y docker-compose p python3-pip
+      - pip3 install nose2
   pre_build:
     commands:
-      - echo "Initializing submodules"
-      - git submodule update --init --recursive
       - echo "export of the image tag for build and push purposes"
       - export IMAGE_TAG=$(git rev-parse --short HEAD)
       - echo "creating a clean environment"
       - make clean setup
   build:
     commands:
-      - make build
+      - docker build -t ${IMAGE_BASE_NAME}:${IMAGE_TAG} .
   post_build:
     commands:
-      - make test
-      - make push
+      - nose2 -s tests/
+      - docker push ${IMAGE_BASE_NAME}:${IMAGE_TAG}
 
