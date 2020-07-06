@@ -39,8 +39,8 @@ phases:
       - make clean setup
   build:
     commands:
-      - echo we need to tag the image correctly, and this should depend on the branch it's from, and / or the branch
-      - echo it's merged into.
+      - echo "we need to tag the image correctly, and this should depend on the branch it's from, and / or the branch"
+      - echo "it's merged into."
       - docker build -t ${IMAGE_BASE_NAME}:${IMAGE_TAG} .
   post_build:
     commands:
