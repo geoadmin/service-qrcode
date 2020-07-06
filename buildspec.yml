@@ -31,6 +31,8 @@ phases:
       - echo CODEBUILD_SOURCE_REPO_URL=${CODEBUILD_SOURCE_REPO_URL}
       - echo COMMIT_HASH=${COMMIT_HASH}
       - echo GITHUB_BRANCH=${GITHUB_BRANCH}
+      - echo trying git describe
+      - git describe
   pre_build:
     commands:
       - echo "export of the image tag for build and push purposes"
