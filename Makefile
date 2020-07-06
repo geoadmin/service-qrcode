@@ -79,7 +79,7 @@ local/bin/python3.7:
 
 .venv/build.timestamp: build/python
 	$(SYSTEM_PYTHON_CMD) -m venv $(INSTALL_DIR) && $(PIP_CMD) install --upgrade pip setuptools
-	${PIP_CMD} install -r dev_requirements.txtf
+	${PIP_CMD} install -r dev_requirements.txt
 	$(PIP_CMD) install -r requirements.txt
 	touch .venv/build.timestamp
 
