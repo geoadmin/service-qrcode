@@ -44,6 +44,6 @@ phases:
       - docker build -t ${IMAGE_BASE_NAME}:${IMAGE_TAG} .
   post_build:
     commands:
-      - nose2 -s tests/
+      - $(which python3)/bin/nose2 -s tests/
       - docker push ${IMAGE_BASE_NAME}:${IMAGE_TAG}
 
