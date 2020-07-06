@@ -1,14 +1,6 @@
-include ./lib-makefiles/integrity.mk
-include ./lib-makefiles/docker.mk
-
-# when you clone the repository, make sure the submodules are cloned as well. git submodule update --init --recursive should do the trick.
-
 SHELL = /bin/bash
 
 .DEFAULT_GOAL := help
-
-ORGNAME := swisstopo
-SERVICE_QR_CODE_HTTP_PORT := 8080
 
 CURRENT_DIR := $(shell pwd)
 INSTALL_DIR := $(CURRENT_DIR)/.venv
@@ -24,11 +16,7 @@ SYSTEM_PYTHON_CMD := $(shell which python3)
 PYTHON_CMD := $(INSTALL_DIR)/bin/python3
 PIP_CMD := $(INSTALL_DIR)/bin/pip3
 FLASK_CMD := $(INSTALL_DIR)/bin/flask
-FLAKE8_CMD := $(INSTALL_DIR)/bin/flake8
-AUTOPEP8_CMD := $(INSTALL_DIR)/bin/autopep8
-MAKO_CMD := $(INSTALL_DIR)/bin/mako-render
-NOSE_CMD := $(INSTALL_DIR)/bin/nosetests
-# COVERAGE_CMD := $(INSTALL_DIR)/bin/coverage
+YAPF_CMD := $(INSTALL_DIR)/bin/yapf
 all: help
 
 # This bit check define the build/python "target": if the system has an acceptable version of python, there will be no need to install python locally.
@@ -64,7 +52,7 @@ help:
 	@echo -e " \033[1mLOCAL SERVER TARGETS\033[0m "
 	@echo "- serve			Run the project using the flask debug server"
 	@echo "- gunicornserve		Run the project using the gunicorn WSGI server"
-	@echo "- dockerserve		Run the project using the gunicorn WSGI server inside a container"
+	@echo "- dockerrun		Run the project using the gunicorn WSGI server inside a container. Env variable HTTP_PORT should be set"
 	@echo "- shutdown		Stop the aforementioned container"
 	@echo -e " \033[1mDOCKER TOOLS TARGETS\033[0m "
 	@echo "- build			Build a target with the current commit tag. If the git repository is not 'clean', the tag will be 'unstable'"
@@ -91,18 +79,15 @@ local/bin/python3.7:
 
 .venv/build.timestamp: build/python
 	$(SYSTEM_PYTHON_CMD) -m venv $(INSTALL_DIR) && $(PIP_CMD) install --upgrade pip setuptools
+	${PIP_CMD} install -r dev_requirements.txtf
 	$(PIP_CMD) install -r requirements.txt
 	touch .venv/build.timestamp
 
-# linting tools. Useful for commit hooks and making sure coding conventions are respected.
+# linting target, calls upon yapf to make sure your code is easier to read and respects some conventions.
 
 .PHONY: lint
 lint: .venv/build.timestamp
-		${FLAKE8_CMD} $(PYTHON_FILES)
-
-.PHONY: autolint
-autolint: .venv/build.timestamp
-		${AUTOPEP8_CMD} --in-place --aggressive --aggressive --verbose $(PYTHON_FILES)
+		$(YAPF_CMD) -i --style .style.yapf $(PYTHON_FILES)
 
 # Serve targets. Using these will run the application on your local machine. You can either serve with a wsgi front (like it would be within the container), or without.
 .PHONY: serve
@@ -113,28 +98,11 @@ serve: .venv/build.timestamp
 gunicornserve: .venv/build.timestamp
 		${SYSTEM_PYTHON_CMD} wsgi.py
 
-# Test target. if units tests or integration tests become too big, feel free to create multiple targets to allow for readability.
-# TODO: once tests are imlpemented, we need the right files here.
-.PHONY: test
-test:
-	@echo -e "${NOSE_CMD} api_diemo/tests/unit_tests/something.py"
-	@echo -e "${NOSE_CMD} api_diemo/tests/integration_tests/something.py"
 
-# Docker related functions. Build and push are self explanatory (might require a docker login for push). Docker serve
-# has the same expected comportment as gunicornserve, but inside a container, while docker docker_shutdown provides an
-# easy target to kill the containers.
+# Docker related functions.
 
-.PHONY: build
-build:
-	$(call dockerbuild,./,service-qr-code,$(call commit_tags))
-
-.PHONY: push
-push: build
-	$(call push,service-qr-code,$(call commit_tags))
-
-.PHONY: dockerserve
-dockerserve: build
-	$(MAKO_CMD) --var app_tag=$(call commit_tags) --var app_port=$(SERVICE_QR_CODE_HTTP_PORT) docker-compose.yml.in > docker-compose.yml
+.PHONY: dockerrun
+dockerrun:
 	docker-compose up -d;
 	sleep 10
 
@@ -151,6 +119,3 @@ clean: clean_venv
 .PHONY: clean_venv
 clean_venv:
 	rm -rf ${INSTALL_DIR};
-
-
-

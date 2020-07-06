@@ -3,4 +3,4 @@ services:
   app:
     image: swisstopo/service-diemo:${app_tag}
     ports:
-      - '${app_port}:${app_port}'
+      - '8080:8080'

@@ -1,3 +1,0 @@
-[submodule "lib-makefiles"]
-	path = lib-makefiles
-	url = https://github.com/geoadmin/lib-makefiles.git
