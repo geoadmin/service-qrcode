@@ -16,7 +16,7 @@ RUN pip3 install -r requirements.txt
 
 COPY "./" "/app/"
 
-RUN chown -R geoadmin:geoadmin /service_qr_code/app
+RUN chown -R geoadmin:geoadmin /app
 USER geoadmin
 
 EXPOSE 8080
