@@ -44,7 +44,6 @@ phases:
       - docker build -t ${IMAGE_BASE_NAME}:${IMAGE_TAG} .
   post_build:
     commands:
-      - NOSE_CMD=which nose2
-      - ${NOSE_CMD} -s tests/
+      - .venv/bin/nose2 -s tests/
       - docker push ${IMAGE_BASE_NAME}:${IMAGE_TAG}
 
