@@ -20,21 +20,10 @@ phases:
       - apt-get update && apt-get install -y docker-compose python3-pip
       - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - GITHUB_BRANCH=${CODEBUILD_WEBHOOK_HEAD_REF#refs/heads/*}
-      - echo "=========== VARIABLES ============="
-      - echo CODEBUILD_RESOLVED_SOURCE_VERSION=${CODEBUILD_RESOLVED_SOURCE_VERSION}
-      - echo CODEBUILD_SOURCE_VERSION=${CODEBUILD_SOURCE_VERSION}
-      - echo CODEBUILD_WEBHOOK_BASE_REF=${CODEBUILD_WEBHOOK_BASE_REF}
-      - echo CODEBUILD_WEBHOOK_HEAD_REF=${CODEBUILD_WEBHOOK_HEAD_REF=}
-      - echo CODEBUILD_WEBHOOK_TRIGGER=${CODEBUILD_WEBHOOK_TRIGGER}
-      - echo CODEBUILD_SOURCE_VERSION=${CODEBUILD_SOURCE_VERSION}
-      - echo CODEBUILD_BUILD_ID=${CODEBUILD_BUILD_ID}
-      - echo CODEBUILD_SOURCE_REPO_URL=${CODEBUILD_SOURCE_REPO_URL}
-      - echo COMMIT_HASH=${COMMIT_HASH}
-      - echo GITHUB_BRANCH=${GITHUB_BRANCH}
   pre_build:
     commands:
       - echo "export of the image tag for build and push purposes"
-      - export IMAGE_TAG=$(git rev-parse --short HEAD)
+      - export IMAGE_TAG="${GITHUB_BRANCH}.${COMMIT_HASH}"
       - echo "creating a clean environment"
       - make clean setup
   build:

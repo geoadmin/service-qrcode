@@ -19,7 +19,7 @@ COPY "./" "/app/"
 RUN chown -R geoadmin:geoadmin /app
 USER geoadmin
 
-EXPOSE 8080
+EXPOSE $HTTP_PORT
 
 # Use a real WSGI server
 ENTRYPOINT ["python3", "wsgi.py"]
