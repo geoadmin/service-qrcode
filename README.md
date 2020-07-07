@@ -11,9 +11,9 @@ The **Make** targets assume you have **bash**, **curl**, **tar**, **docker** and
 
 ### Setting up to work
 
-First, you'll need to clone the repo and ensure the makefiles libraries are imported as well.
+First, you'll need to clone the repo
 
-    git clone git@github.com:geoadmin/service-qrcode.git && cd service-qrcode && git submodule update --init --recursive
+    git clone git@github.com:geoadmin/service-qrcode.git
 
 Then, you can run the setup target to ensure you have everything needed to develop, test and serve locally
 
