@@ -1,0 +1,64 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Service QRCode
+paths:
+  /rest/checker:
+    get:
+      summary: route to check if the service is up.
+      operationId: checker
+      tags:
+        - checker
+      responses:
+        '200':
+          description: Returning OK
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "OK"
+        '500':
+          description: Internal Error
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "The server encountered an internal error"
+
+
+  /rest/generate:
+    get:
+      summary: create a QR code describing the shortened given URL.
+      operationId: getLegend
+      tags:
+        - generation
+      parameters:
+        - name: url
+          in: query
+          required: true
+          description: The url for which a QR code needs to be generated
+          schema:
+            type: string
+            example: "https://example.admin.ch"
+      responses:
+        '200':
+          description: Returning a QR Code describing the shortened link. Should the service used to shorten the link fail its task, this will create a QR Code describing the full link instead.
+          content:
+            image/png:
+              schema:
+                 type: object
+        '400':
+          description: Bas Requests from the client. This can be caused by the absence of the url parameter, the host can't be determined from the request or the host/the domain is/are not part of the authorised hosts / domains.
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "The parameter 'url' is missing from the request"
+
+        '500':
+          description: unexpected error
+          content:
+            text/html:
+              schema:
+                type: string
+                example: "An internal error occured during the QR Code generation"
