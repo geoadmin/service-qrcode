@@ -6,11 +6,6 @@ CURRENT_DIR := $(shell pwd)
 INSTALL_DIR := $(CURRENT_DIR)/.venv
 PYTHON_FILES := $(shell find ./* -type f -name "*.py" -print)
 
-#FIXME: put this variable in config file
-PYTHON_VERSION=3.7.4
-CURRENT_PYTHON_VERSION := $(shell python3 -c "import sys;t='{v[0]}.{v[1]}.{v[2]}'.format(v=list(sys.version_info[:]));sys.stdout.write(t)")
-PYTHON_VERSION_OK := $(shell python3 -c "import sys; t=sys.version_info[0:3]; print(int('{}.{}.{}'.format(*t) == '$(PYTHON_VERSION)'))")
-
 # Commands
 SYSTEM_PYTHON_CMD := $(shell which python3)
 PYTHON_CMD := $(INSTALL_DIR)/bin/python3
@@ -19,23 +14,7 @@ FLASK_CMD := $(INSTALL_DIR)/bin/flask
 YAPF_CMD := $(INSTALL_DIR)/bin/yapf
 all: help
 
-# This bit check define the build/python "target": if the system has an acceptable version of python, there will be no need to install python locally.
 
-ifeq ($(PYTHON_VERSION_OK),1)
-PYTHON_BINDIR := $(shell dirname $(PYTHON_CMD))
-PYTHONHOME := $(shell eval "cd $(PYTHON_BINDIR); pwd; cd > /dev/null")
-build/python:
-		@echo $(CURRENT_PYTHON_VERSION)
-		@echo $(shell $(PYTHON_CMD) -c "print('OK')")
-		mkdir -p build
-		touch build/python;
-else
-build/python: local/bin/python3.7
-	mkdir -p build
-	touch build/python;
-
-SYSTEM_PYTHON_CMD := $(CURRENT_DIR)/local/bin/python3.7
-endif
 
 
 
@@ -59,20 +38,23 @@ help:
 
 # Build targets. Calling setup is all that is needed for the local files to be installed as needed. Bundesnetz may cause problem.
 
-python: build/python
-	@echo "Python installed"
+# This run the python installation script. The script is in charge of both checking the version and installing the minimal python version needed.
+build/python:
+    source ./setup_python.sh
+	mkdir -p build
+	touch build/python
 
 .PHONY: setup
-setup: python .venv/build.timestamp
+setup: build/python .venv/build.timestamp
 
 
-local/bin/python3.7:
-	mkdir -p $(CURRENT_DIR)/local;
-	curl -z $(CURRENT_DIR)/local/Python-$(PYTHON_VERSION).tar.xz https://www.python.org/ftp/python/$(PYTHON_VERSION)/Python-$(PYTHON_VERSION).tar.xz -o $(CURRENT_DIR)/local/Python-$(PYTHON_VERSION).tar.xz;
-	cd $(CURRENT_DIR)/local && tar -xf Python-$(PYTHON_VERSION).tar.xz && Python-$(PYTHON_VERSION)/configure --prefix=$(CURRENT_DIR)/local/ && make altinstall
-
+# We check if we have a "local" python version. If that's the case, we use this one to create our virtual environment.
 .venv/build.timestamp: build/python
-	$(SYSTEM_PYTHON_CMD) -m venv $(INSTALL_DIR) && $(PIP_CMD) install --upgrade pip setuptools
+ifneq ("$(wildcard $(CURRENT_DIR)/local/bin/python3.7)","")
+    $(CURRENT_DIR)/local/bin/python3.7 -m venv $(INSTALL_DIR) && $(PIP_CMD) install --upgrade pip setuptools
+else
+    $(SYSTEM_PYTHON_CMD) -m venv $(INSTALL_DIR) && $(PIP_CMD) install --upgrade pip setuptools
+endif
 	${PIP_CMD} install -r dev_requirements.txt
 	$(PIP_CMD) install -r requirements.txt
 	touch .venv/build.timestamp
