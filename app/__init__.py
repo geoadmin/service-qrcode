@@ -1,4 +1,5 @@
 from flask import Flask
+
 from app.middleware import ReverseProxy
 
 # Standard Flask application initialisation

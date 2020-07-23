@@ -45,3 +45,6 @@ local/
 
 #vim
 *.swp
+
+# git generate files
+*.orig
