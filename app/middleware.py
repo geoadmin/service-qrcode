@@ -5,9 +5,7 @@ class ReverseProxy(object):
     everything runs smoothly.
     """
 
-    def __init__(
-        self, app, script_name=None, scheme=None, server=None, port=None
-    ):
+    def __init__(self, app, script_name=None, scheme=None, server=None, port=None):
         self.app = app
         self.script_name = script_name
         self.scheme = scheme
@@ -16,10 +14,10 @@ class ReverseProxy(object):
 
     def __call__(self, environ, start_response):
         """
-        This function modifies the environment received by the WSGI, mostly making sure we serve the
-        right routes and that the application answers as if it were the initial host (for example,
-        an error should say that the site at reverse-proxied.admin.ch/qrcode/generate encountered a
-        problem, not that it was at internal.server/generate
+        This function modifies the environment received by the WSGI, mostly making sure we serve
+        the right routes and that the application answers as if it were the initial host (for
+        example, an error should say that the site at reverse-proxied.admin.ch/generic_name/generate
+        encountered a problem, not that it was at internal.server/generate
 
         :param environ: the WSGI environment
         :param start_response: A callable accepting headers, a status code and can accept an
@@ -29,12 +27,12 @@ class ReverseProxy(object):
         """
         """
         The first part makes sure the route goes to the right resource.
-        If we have a query made to reverse-proxy.admin.ch/qrcode/generate,
-        HTTP_X_SCRIPT_NAME will be /qrcode, and PATH_INFO would be /qrcode/generate.
+        If we have a query made to reverse-proxy.admin.ch/generic_name/generate,
+        HTTP_X_SCRIPT_NAME will be /generic_name, and PATH_INFO would be /generic_name/generate.
 
         PATH_INFO is used to handle the route called (in this case, it would use /generate)
         SCRIPT_NAME is used to prefix the routes so that the application returns a correct answer
-        (namely: that the query was hitting /qrcode/generate).
+        (namely: that the query was hitting /generic_name/generate).
         """
         # The syntax here means : try to get HTTP_X_SCRIPT_NAME, or get me an empty string, and the
         # command or, in the context of a string, returns the first "truthy" value
