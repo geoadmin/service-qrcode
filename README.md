@@ -34,7 +34,9 @@ following command:
 
 ### Test your work
 
-Testing if what you developed work is made simple. You have three targets at your disposal. **serve, gunicornserve, dockerrun**
+Testing if what you developed work is made simple. You have four targets at your disposal. **test, serve, gunicornserve, dockerrun**
+
+    make test
 
 This command run the integration and unit tests.
 
@@ -48,20 +50,12 @@ This will serve the application with the Gunicorn layer in front of the applicat
 
     make dockerrun
 
-
 This will serve the application with the wsgi server, inside a container.
 To stop serving through containers,
 
     make shutdown
 
 Is the command you're looking for.
-
-Running the tests is not a makefile target. nose2 will be installed by the setup in your virtual environment, which means you can
-use
-
-    .venv/bin/nose2 -s tests/*
-
-to run your tests
 
 ## Endpoints
 all trailing slashes are optionals
