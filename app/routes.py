@@ -5,6 +5,7 @@ import qrcode
 from flask import request, abort, make_response
 
 from app import app
+from app.helpers import make_error_msg
 from app.helpers.url import validate_url
 from app.helpers.route import prefix_route
 
@@ -22,9 +23,9 @@ def generate():
     content = request.json
     # sanity check
     if content is None or 'url' not in content:
-        abort(400, "The property 'url' is missing from the request body")
+        abort(make_error_msg(400, "The property 'url' is missing from the request body"))
     if not isinstance(content['url'], str):
-        abort(400, "Invalid property 'url' in request body, must be a string")
+        abort(make_error_msg(400, "Invalid property 'url' in request body, must be a string"))
 
     url = quote(validate_url(content['url']))
 

@@ -52,18 +52,45 @@ paths:
             image/png:
               schema:
                 type: object
+
         "400":
           description: Bad Requests from the client. This can be caused by the absence of the url parameter, the host can't be determined from the request or the host/the domain is/are not part of the authorised hosts / domains.
           content:
-            text/html:
+            application/json:
               schema:
-                type: string
-                example: "The property 'url' is missing from the request body"
+                $ref: "#/components/schemas/error"
+                example:
+                  success: false
+                  error:
+                    code: 400
+                    message: "The property 'url' is missing from the request body"
 
         "500":
           description: unexpected error
           content:
-            text/html:
+            application/json:
               schema:
-                type: string
-                example: "An internal error occured during the QR Code generation"
+                $ref: "#/components/schemas/error"
+                example:
+                  success: false
+                  error:
+                    code: 500
+                    message: "An internal error occured during the QR Code generation"
+
+components:
+  schemas:
+    error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Always false in case of error
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: Error code
+            message:
+              type: string
+              description: Description of the error

@@ -2,6 +2,7 @@ import re
 
 from flask import Flask, request, abort
 
+from app.helpers import make_error_msg
 from app.helpers.url import ALLOWED_DOMAINS_PATTERN
 from app.middleware import ReverseProxy
 
@@ -30,7 +31,7 @@ def validate_origin():
         'Origin' in request.headers and
         not re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin'])
     ):
-        abort(403, 'Domain not allowed')
+        abort(make_error_msg(403, 'Domain not allowed'))
 
 
 from app import routes  # pylint: disable=wrong-import-position
