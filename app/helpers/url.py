@@ -3,11 +3,13 @@ import re
 
 from flask import abort
 
-ALLOWED_DOMAIN = [
+ALLOWED_DOMAINS = [
     r'.*\.geo\.admin\.ch',
     r'.*bgdi\.ch',
     r'.*\.swisstopo\.cloud',
 ]
+
+ALLOWED_DOMAINS_PATTERN = '({})'.format('|'.join(ALLOWED_DOMAINS))
 
 
 def validate_url(url):
@@ -33,8 +35,7 @@ def validate_url(url):
     if result.hostname is None:
         abort(400, 'Invalid URL, could not determine the hostname')
 
-    domain_pattern = '({})'.format('|'.join(ALLOWED_DOMAIN))
-    if not re.match(domain_pattern, result.hostname):
+    if not re.match(ALLOWED_DOMAINS_PATTERN, result.hostname):
         abort(400, 'URL domain not allowed')
 
     return url
