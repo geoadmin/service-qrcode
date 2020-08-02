@@ -14,17 +14,29 @@ paths:
         "200":
           description: Returning OK
           content:
-            text/html:
+            application/json:
               schema:
-                type: string
-                example: "OK"
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Always true for 200 response
+                  message:
+                    type: string
+                example:
+                  success: true
+                  message: "OK"
         "500":
-          description: Internal Error
+          description: unexpected error
           content:
-            text/html:
+            application/json:
               schema:
-                type: string
-                example: "The server encountered an internal error"
+                $ref: "#/components/schemas/error"
+                example:
+                  success: false
+                  error:
+                    code: 500
+                    message: "An internal error occured"
 
   /v4/qrcode/generate:
     post:

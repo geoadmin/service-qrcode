@@ -2,7 +2,7 @@ from io import BytesIO
 from urllib.parse import quote
 
 import qrcode
-from flask import request, abort, make_response
+from flask import request, abort, make_response, jsonify
 
 from app import app
 from app.helpers import make_error_msg
@@ -15,7 +15,7 @@ app.route = prefix_route(app.route, '/v4/qrcode/')
 
 @app.route('/checker', methods=['GET'])
 def check():
-    return "OK"
+    return make_response(jsonify({'success': True, 'message': 'OK'}))
 
 
 @app.route('/generate', methods=['POST'])

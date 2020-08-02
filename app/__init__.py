@@ -1,6 +1,7 @@
 import re
 
-from flask import Flask, request, abort
+from flask import Flask, request, abort, json
+from werkzeug.exceptions import HTTPException
 
 from app.helpers import make_error_msg
 from app.helpers.url import ALLOWED_DOMAINS_PATTERN
@@ -31,7 +32,14 @@ def validate_origin():
         'Origin' in request.headers and
         not re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin'])
     ):
-        abort(make_error_msg(403, 'Domain not allowed'))
+        abort(make_error_msg(403, 'Not allowed'))
+
+
+# Register error handler to make sure that every error returns a json answer
+@app.errorhandler(HTTPException)
+def handle_exception(err):
+    """Return JSON instead of HTML for HTTP errors."""
+    return make_error_msg(err.code, err.description)
 
 
 from app import routes  # pylint: disable=wrong-import-position
