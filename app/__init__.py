@@ -1,8 +1,16 @@
+import logging.config
 import re
 
-from flask import Flask, request, abort, json
 from werkzeug.exceptions import HTTPException
 
+from flask import Flask
+from flask import abort
+# The logging must be done on the current_app to avoid pylint issues
+from flask import current_app as capp
+from flask import json
+from flask import request
+
+import app.logging
 from app.helpers import make_error_msg
 from app.helpers.url import ALLOWED_DOMAINS_PATTERN
 from app.middleware import ReverseProxy
@@ -32,6 +40,7 @@ def validate_origin():
         'Origin' in request.headers and
         not re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin'])
     ):
+        capp.logger.error('Origin=%s is not allowed', request.headers['Origin'])
         abort(make_error_msg(403, 'Not allowed'))
 
 
@@ -39,6 +48,7 @@ def validate_origin():
 @app.errorhandler(HTTPException)
 def handle_exception(err):
     """Return JSON instead of HTML for HTTP errors."""
+    capp.logger.error('Request failed code=%d description=%s', err.code, err.description)
     return make_error_msg(err.code, err.description)
 
 
