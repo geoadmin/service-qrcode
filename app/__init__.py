@@ -36,10 +36,10 @@ def add_cors_header(response):
 # Reject request from non allowed origins
 @app.before_request
 def validate_origin():
-    if (
-        'Origin' in request.headers and
-        not re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin'])
-    ):
+    if 'Origin' not in request.headers:
+        capp.logger.error('Origin header is not set')
+        abort(make_error_msg(403, 'Not allowed'))
+    if not re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin']):
         capp.logger.error('Origin=%s is not allowed', request.headers['Origin'])
         abort(make_error_msg(403, 'Not allowed'))
 

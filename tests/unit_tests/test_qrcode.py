@@ -15,13 +15,27 @@ class QrCodeTests(unittest.TestCase):
         pass
 
     def test_checker(self):
-        response = self.app.get(f"{self.route_prefix}/checker")
+        response = self.app.get(
+            f"{self.route_prefix}/checker", headers={"Origin": "map.geo.admin.ch"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         self.assertEqual(response.json, {"message": "OK", "success": True})
 
     def test_generate_errors(self):
         response = self.app.get(f"{self.route_prefix}/generate")
+        self.assertEqual(response.status_code, 403, msg="ORIGIN must be set")
+        self.assertEqual(response.content_type, "application/json")
+        self.assertEqual(
+            response.json, {
+                "error": {
+                    "code": 403, "message": "Not allowed"
+                }, "success": False
+            }
+        )
+        response = self.app.get(
+            f"{self.route_prefix}/generate", headers={"Origin": "map.geo.admin.ch"}
+        )
         self.assertEqual(response.status_code, 405, msg="GET method is not allowed")
         self.assertEqual(response.content_type, "application/json")
         self.assertEqual(
@@ -35,7 +49,9 @@ class QrCodeTests(unittest.TestCase):
             }
         )
 
-        response = self.app.post(f"{self.route_prefix}/generate")
+        response = self.app.post(
+            f"{self.route_prefix}/generate", headers={"Origin": "map.geo.admin.ch"}
+        )
         self.assertEqual(response.status_code, 400, msg="JSON body is requested")
         self.assertEqual(response.content_type, "application/json")
         self.assertEqual(
@@ -53,7 +69,8 @@ class QrCodeTests(unittest.TestCase):
         response = self.app.post(
             f"{self.route_prefix}/generate",
             data=json.dumps({"url": "https://example.com"}),
-            content_type="text/html"
+            content_type="text/html",
+            headers={"Origin": "map.geo.admin.ch"}
         )
         self.assertEqual(response.status_code, 400, msg="Only JSON body is accepted")
         self.assertEqual(response.content_type, "application/json")
@@ -70,11 +87,11 @@ class QrCodeTests(unittest.TestCase):
         )
 
     def test_generate_domain_restriction(self):
-
         response = self.app.post(
             f"{self.route_prefix}/generate",
             data=json.dumps({"url": "https://map.geo.admin.ch/test"}),
             content_type="application/json",
+            headers={"Origin": "map.geo.admin.ch"}
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "image/png")
