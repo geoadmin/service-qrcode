@@ -1,5 +1,9 @@
 # service-qrcode
 
+| Branch | Status |
+|--------|-----------|
+| develop | ![Build Status](https://codebuild.eu-central-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoibVJMdm9sbXA4cU1YcWtFMml1UVQwQ2tmdzQ3Z0ZsOFBjVDlsb1NNNTFwZURlWE9qdENiVytId0VzVkJpblBvTmxqVEllSEt0cnlVcXNNR2pqRTNESjRNPSIsIml2UGFyYW1ldGVyU3BlYyI6IkdsNE1FbkZka0hqTFFscjAiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=develop) |
+
 ## Summary of the project
 A simple REST microservice meant to return a QR code from an URL, using Flask and Gunicorn, with docker containers as a mean of deployment.
 
