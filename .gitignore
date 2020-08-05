@@ -45,3 +45,9 @@ local/
 
 #vim
 *.swp
+
+# git generate files
+*.orig
+
+# visual studio code config
+.vscode

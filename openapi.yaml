@@ -2,63 +2,107 @@ openapi: "3.0.0"
 info:
   version: "1.0.0"
   title: Service QRCode
+
 paths:
-  /rest/checker:
+  /v4/qrcode/checker:
     get:
-      summary: route to check if the service is up.
+      summary: Route to check if the service is up.
       operationId: checker
       tags:
         - checker
       responses:
-        '200':
+        "200":
           description: Returning OK
           content:
-            text/html:
+            application/json:
               schema:
-                type: string
-                example: "OK"
-        '500':
-          description: Internal Error
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Always true for 200 response
+                  message:
+                    type: string
+                example:
+                  success: true
+                  message: "OK"
+        "500":
+          description: unexpected error
           content:
-            text/html:
+            application/json:
               schema:
-                type: string
-                example: "The server encountered an internal error"
+                $ref: "#/components/schemas/error"
+                example:
+                  success: false
+                  error:
+                    code: 500
+                    message: "An internal error occured"
 
-
-  /rest/generate:
-    get:
-      summary: create a QR code describing the shortened given URL.
-      operationId: getLegend
+  /v4/qrcode/generate:
+    post:
+      summary: Generate a QR code describing the shortened given URL.
+      operationId: generateQrCode
       tags:
         - generation
-      parameters:
-        - name: url
-          in: query
-          required: true
-          description: The url for which a QR code needs to be generated
-          schema:
-            type: string
-            example: "https://example.admin.ch"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  description: The url for which a QR code needs to be generated
+            example: { url: "https://example.admin.ch" }
       responses:
-        '200':
-          description: Returning a QR Code describing the shortened link. Should the service used to shorten the link fail its task, this will create a QR Code describing the full link instead.
+        "200":
+          description: Returning a QR Code describing the link.
           content:
             image/png:
               schema:
-                 type: object
-        '400':
-          description: Bas Requests from the client. This can be caused by the absence of the url parameter, the host can't be determined from the request or the host/the domain is/are not part of the authorised hosts / domains.
-          content:
-            text/html:
-              schema:
-                type: string
-                example: "The parameter 'url' is missing from the request"
+                type: object
 
-        '500':
+        "400":
+          description: Bad Requests from the client. This can be caused by the absence of the url parameter, the host can't be determined from the request or the host/the domain is/are not part of the authorised hosts / domains.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+                example:
+                  success: false
+                  error:
+                    code: 400
+                    message: "The property 'url' is missing from the request body"
+
+        "500":
           description: unexpected error
           content:
-            text/html:
+            application/json:
               schema:
-                type: string
-                example: "An internal error occured during the QR Code generation"
+                $ref: "#/components/schemas/error"
+                example:
+                  success: false
+                  error:
+                    code: 500
+                    message: "An internal error occured during the QR Code generation"
+
+components:
+  schemas:
+    error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Always false in case of error
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: Error code
+            message:
+              type: string
+              description: Description of the error

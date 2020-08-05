@@ -5,11 +5,12 @@
 | develop | ![Build Status](https://codebuild.eu-central-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoibVJMdm9sbXA4cU1YcWtFMml1UVQwQ2tmdzQ3Z0ZsOFBjVDlsb1NNNTFwZURlWE9qdENiVytId0VzVkJpblBvTmxqVEllSEt0cnlVcXNNR2pqRTNESjRNPSIsIml2UGFyYW1ldGVyU3BlYyI6IkdsNE1FbkZka0hqTFFscjAiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=develop) |
 
 ## Summary of the project
+
 A simple REST microservice meant to return a QR code from an URL, using Flask and Gunicorn, with docker containers as a mean of deployment.
 
 ## How to run locally
 
-### dependencies
+### Dependencies
 
 The **Make** targets assume you have **bash**, **curl**, **tar**, **docker** and **docker-compose** installed.
 
@@ -62,63 +63,20 @@ To stop serving through containers,
 Is the command you're looking for.
 
 ## Endpoints
-all trailing slashes are optionals
 
+### /checker GET
 
-### /checker/
-
-#### description of the route
 this is a simple route meant to test if the server is up.
-#### parameters ####
 
-None
+### /generate POST
 
-#### expected results
+This route takes a shortened url, check if the hostname and domain are part of allowed hostnames and domains, then
+create a QR Code from that shortened URL.
 
-**Success**
-
-    "OK", 200
-
-### /generate/
-### /qrcodegenerator/
- /qrcodegenerator/ is the legacy route. This should be kept until the geoadmin viewer no longer requests it.
- Both routes have the exact same comportment.
-#### description of the route
-This route takes an url, check if the hostname and domain are part of allowed hostnames and domains, shorten it
-(through the API's shortener endpoint), then create a QR Code from that shortened URL.
-#### parameters ####
-
-url, **String**, Mandatory
-
-#### expected results
-
-**Success**
-
-    a QR code linking to the shortened URL, 200
-
-Alternatively, as the shortener might encounter a temporary hiccup, the following result may happen.
-
-    a QR code linking to the non shortened URL, 200
-
-**Failures**
-
-No url in the request
-
-    "The parameter 'url' is missing from the request", 400
-
-No hostname
-
-    "Could not determine the hostname", 400
-
-Hostname or Domain not part of authorised hosts or domains
-
-    "Shortener can only be used for [ list of allowed domains ] domains or [ list of allowed hosts ] hosts.", 400
-
-Internal Error
-
-    "An error occured during the qrcode generation", 500
+For more informations about endpoints look at the [OpenAPI Sepc](openapi.yaml)
 
 ## Deploying the project and continuous integration
+
 When creating a PR, terraform should run a codebuild job to test, build and push automatically your PR as a tagged container.
 
 This service is to be deployed to the Kubernetes cluster once it is merged.
