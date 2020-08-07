@@ -15,7 +15,7 @@ from app.helpers.route import prefix_route
 from app.helpers.url import validate_url
 
 # add route prefix
-app.route = prefix_route(app.route, '/v4/qrcode/')
+app.route = prefix_route(app.route, '/v4/qrcode')
 
 
 @app.route('/checker', methods=['GET'])
