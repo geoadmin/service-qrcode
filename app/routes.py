@@ -12,19 +12,22 @@ from flask import request
 from app import app
 from app.helpers import make_error_msg
 from app.helpers.route import prefix_route
+from app.helpers.route import check_version
 from app.helpers.url import validate_url
 
 # add route prefix
-app.route = prefix_route(app.route, '/v4/qrcode/')
+app.route = prefix_route(app.route, '/v<int:version>/qrcode')
 
 
 @app.route('/checker', methods=['GET'])
-def check():
+@check_version(min_version=4)
+def check(version):
     return make_response(jsonify({'success': True, 'message': 'OK'}))
 
 
 @app.route('/generate', methods=['POST'])
-def generate():
+@check_version(min_version=4)
+def generate(version):
     content = request.json
     # sanity check
     if content is None or 'url' not in content:

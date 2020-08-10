@@ -14,6 +14,32 @@ class QrCodeTests(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_api_version(self):
+        response = self.app.get("/v3/qrcode/checker", headers={"Origin": "map.geo.admin.ch"})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content_type, "application/json")
+        self.assertEqual(
+            response.json, {
+                "error": {
+                    "code": 400, "message": "api version v3 not supported"
+                }, "success": False
+            }
+        )
+
+        response = self.app.get("/v4/qrcode/checker", headers={"Origin": "map.geo.admin.ch"})
+        self.assertEqual(response.status_code, 200)
+
+        response = self.app.post("/v3/qrcode/generate", headers={"Origin": "map.geo.admin.ch"})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.content_type, "application/json")
+        self.assertEqual(
+            response.json, {
+                "error": {
+                    "code": 400, "message": "api version v3 not supported"
+                }, "success": False
+            }
+        )
+
     def test_checker(self):
         response = self.app.get(
             f"{self.route_prefix}/checker", headers={"Origin": "map.geo.admin.ch"}
