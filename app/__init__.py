@@ -14,7 +14,7 @@ from app.helpers import make_error_msg
 from app.helpers.url import ALLOWED_DOMAINS_PATTERN
 from app.middleware import ReverseProxy
 
-# First init logging
+# Initialize Logging using JSON format for all loggers and using the Stream Handler.
 init_logging()
 
 logger = logging.getLogger(__name__)
