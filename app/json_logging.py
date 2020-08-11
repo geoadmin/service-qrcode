@@ -1,10 +1,10 @@
 import json
 import logging
+import logging.config
 from datetime import datetime
 
 from flask import has_request_context
 from flask import request
-from flask.logging import default_handler
 
 
 class JsonFormatter(logging.Formatter):
@@ -25,8 +25,26 @@ class JsonFormatter(logging.Formatter):
 
 
 def init_logging():
-    default_handler.setFormatter(JsonFormatter())
+    logging.config.dictConfig(
+        config={
+            'version': 1,
+            'disable_existing_loggers': False,
+            'root': {
+                'level': 'DEBUG', 'propagate': True, 'handlers': ['console']
+            },
+            'handlers': {
+                'console': {
+                    'class': 'logging.StreamHandler', 'level': 'DEBUG'
+                }
+            },
+            'loggers': {
+                'nose2': {
+                    'level': 'INFO'
+                }
+            }
+        }
+    )
 
     # Uses the default handler for all libraries (e.g. werkzeug)
     root = logging.getLogger()
-    root.addHandler(default_handler)
+    root.handlers[0].setFormatter(JsonFormatter())
