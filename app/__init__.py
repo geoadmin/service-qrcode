@@ -1,3 +1,4 @@
+import logging
 import logging.config
 import re
 
@@ -5,15 +6,18 @@ from werkzeug.exceptions import HTTPException
 
 from flask import Flask
 from flask import abort
-# The logging must be done on the current_app to avoid pylint issues
-from flask import current_app as capp
 from flask import json
 from flask import request
 
-import app.logging
+from app.json_logging import init_logging
 from app.helpers import make_error_msg
 from app.helpers.url import ALLOWED_DOMAINS_PATTERN
 from app.middleware import ReverseProxy
+
+# First init logging
+init_logging()
+
+logger = logging.getLogger(__name__)
 
 # Standard Flask application initialisation
 
@@ -37,10 +41,10 @@ def add_cors_header(response):
 @app.before_request
 def validate_origin():
     if 'Origin' not in request.headers:
-        capp.logger.error('Origin header is not set')
+        logger.error('Origin header is not set')
         abort(make_error_msg(403, 'Not allowed'))
     if not re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin']):
-        capp.logger.error('Origin=%s is not allowed', request.headers['Origin'])
+        logger.error('Origin=%s is not allowed', request.headers['Origin'])
         abort(make_error_msg(403, 'Not allowed'))
 
 
@@ -48,7 +52,7 @@ def validate_origin():
 @app.errorhandler(HTTPException)
 def handle_exception(err):
     """Return JSON instead of HTML for HTTP errors."""
-    capp.logger.error('Request failed code=%d description=%s', err.code, err.description)
+    logger.error('Request failed code=%d description=%s', err.code, err.description)
     return make_error_msg(err.code, err.description)
 
 

@@ -24,8 +24,9 @@ class JsonFormatter(logging.Formatter):
         return json.dumps(msg_obj)
 
 
-default_handler.setFormatter(JsonFormatter())
+def init_logging():
+    default_handler.setFormatter(JsonFormatter())
 
-# Uses the default handler for all libraries (e.g. werkzeug)
-root = logging.getLogger()
-root.addHandler(default_handler)
+    # Uses the default handler for all libraries (e.g. werkzeug)
+    root = logging.getLogger()
+    root.addHandler(default_handler)

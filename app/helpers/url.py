@@ -1,8 +1,8 @@
+import logging
 import re
 from urllib.parse import urlparse
 
 from flask import abort
-from flask import current_app as capp
 
 from app.helpers import make_error_msg
 
@@ -13,6 +13,8 @@ ALLOWED_DOMAINS = [
 ]
 
 ALLOWED_DOMAINS_PATTERN = '({})'.format('|'.join(ALLOWED_DOMAINS))
+
+logger = logging.getLogger(__name__)
 
 
 def validate_url(url):
@@ -33,15 +35,15 @@ def validate_url(url):
     try:
         result = urlparse(url)
     except ValueError as err:
-        capp.logger.error('Invalid URL: %s', str(err))
+        logger.error('Invalid URL: %s', err)
         abort(make_error_msg(400, f'Invalid URL, {err}'))
 
     if result.hostname is None:
-        capp.logger.error('Invalid URL, could not determine the hostname, url=%s', url)
+        logger.error('Invalid URL, could not determine the hostname, url=%s', url)
         abort(make_error_msg(400, 'Invalid URL, could not determine the hostname'))
 
     if not re.match(ALLOWED_DOMAINS_PATTERN, result.hostname):
-        capp.logger.error('URL domain not allowed')
+        logger.error('URL domain not allowed')
         abort(make_error_msg(400, 'URL domain not allowed'))
 
     return url
