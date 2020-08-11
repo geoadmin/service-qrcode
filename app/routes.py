@@ -20,13 +20,13 @@ app.route = prefix_route(app.route, '/v<int:version>/qrcode')
 
 
 @app.route('/checker', methods=['GET'])
-@check_version(min_version=4)
+@check_version(version=4)
 def check(version):
     return make_response(jsonify({'success': True, 'message': 'OK'}))
 
 
 @app.route('/generate', methods=['POST'])
-@check_version(min_version=4)
+@check_version(version=4)
 def generate(version):
     content = request.json
     # sanity check

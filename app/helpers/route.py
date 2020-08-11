@@ -25,7 +25,7 @@ def prefix_route(route_decorator, prefix='', fmt='{prefix}{route}'):
     return newroute
 
 
-def check_version(min_version=4):
+def check_version(version=4):
 
     def decorator(function):
 
@@ -33,7 +33,7 @@ def check_version(min_version=4):
         def wrapper(*args, **kwargs):
             if 'version' not in kwargs:
                 abort(make_error_msg(400, 'api version not specified'))
-            if kwargs['version'] < min_version:
+            if kwargs['version'] != version:
                 abort(make_error_msg(400, 'api version v%s not supported' % (kwargs["version"])))
             return function(*args, **kwargs)
 
