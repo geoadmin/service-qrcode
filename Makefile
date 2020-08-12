@@ -93,7 +93,7 @@ lint: .venv/build.timestamp
 .PHONY: test
 test: .venv/build.timestamp
 	mkdir -p $(TEST_REPORT_DIR)
-	$(NOSE_CMD) --plugin nose2.plugins.junitxml --junit-xml --junit-xml-path $(TEST_REPORT_DIR)/$(TEST_REPORT_FILE) -s tests/
+	$(NOSE_CMD) -c tests/unittest.cfg --plugin nose2.plugins.junitxml --junit-xml --junit-xml-path $(TEST_REPORT_DIR)/$(TEST_REPORT_FILE) -s tests/
 
 # Serve targets. Using these will run the application on your local machine. You can either serve with a wsgi front (like it would be within the container), or without.
 .PHONY: serve
