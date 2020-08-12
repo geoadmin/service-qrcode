@@ -6,6 +6,8 @@ CURRENT_DIR := $(shell pwd)
 INSTALL_DIR := $(CURRENT_DIR)/.venv
 PYTHON_LOCAL_DIR := $(CURRENT_DIR)/build/local
 PYTHON_FILES := $(shell find ./* -type f -name "*.py" -print)
+TEST_REPORT_DIR := $(CURRENT_DIR)/tests/report
+TEST_REPORT_FILE := nose2-junit.xml
 
 #FIXME: put this variable in config file
 PYTHON_VERSION := 3.7.4
@@ -90,7 +92,8 @@ lint: .venv/build.timestamp
 
 .PHONY: test
 test: .venv/build.timestamp
-	$(NOSE_CMD) -c tests/unittest.cfg -s tests/
+	mkdir -p $(TEST_REPORT_DIR)
+	$(NOSE_CMD) -c tests/unittest.cfg --plugin nose2.plugins.junitxml --junit-xml --junit-xml-path $(TEST_REPORT_DIR)/$(TEST_REPORT_FILE) -s tests/
 
 # Serve targets. Using these will run the application on your local machine. You can either serve with a wsgi front (like it would be within the container), or without.
 .PHONY: serve

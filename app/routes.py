@@ -17,7 +17,7 @@ from app.helpers.url import validate_url
 logger = logging.getLogger(__name__)
 
 # add route prefix
-app.route = prefix_route(app.route, '/v4/qrcode/')
+app.route = prefix_route(app.route, '/v4/qrcode')
 
 
 @app.route('/checker', methods=['GET'])
