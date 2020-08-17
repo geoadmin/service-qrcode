@@ -1,6 +1,5 @@
 import logging
 from io import BytesIO
-from urllib.parse import quote
 
 import qrcode
 
@@ -36,7 +35,7 @@ def generate():
         logger.error("Invalid property 'url' in request body, must be a string")
         abort(make_error_msg(400, "Invalid property 'url' in request body, must be a string"))
 
-    url = quote(validate_url(content['url']))
+    url = validate_url(content['url'])
 
     logger.debug('generate request with url=%s', url)
 
