@@ -124,13 +124,13 @@ dockerbuild: $(DOCKER_BUILD_TIMESTAMP)
 
 .PHONY: dockerrun
 dockerrun: $(DOCKER_BUILD_TIMESTAMP)
-	export HTTP_PORT=$(HTTP_PORT); docker-compose up -d
-	sleep 10
+	HTTP_PORT=$(HTTP_PORT) docker-compose up -d
+	sleep 5
 
 
 .PHONY: shutdown
 shutdown:
-	export HTTP_PORT=$(HTTP_PORT); docker-compose down
+	HTTP_PORT=$(HTTP_PORT) docker-compose down
 
 
 .PHONY: clean_venv
@@ -151,6 +151,7 @@ clean: clean_venv
 
 $(TIMESTAMPS):
 	mkdir -p $(TIMESTAMPS)
+
 
 $(VENV_TIMESTAMP): $(SYSTEM_PYTHON_TIMESTAMP)
 	test -d $(VENV) || $(SYSTEM_PYTHON) -m venv $(VENV) && $(PIP) install --upgrade pip setuptools
