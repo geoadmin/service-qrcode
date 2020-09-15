@@ -108,7 +108,7 @@ format-lint: format lint
 .PHONY: test
 test: $(DEV_REQUIREMENTS_TIMESTAMP)
 	mkdir -p $(TEST_REPORT_DIR)
-	$(NOSE) -c tests/unittest.cfg --plugin nose2.plugins.junitxml --junit-xml --junit-xml-path $(TEST_REPORT_DIR)/$(TEST_REPORT_FILE) -s tests/
+	$(NOSE) -c tests/unittest.cfg --verbose --junit-xml-path $(TEST_REPORT_DIR)/$(TEST_REPORT_FILE) -s tests/
 
 
 # Serve targets. Using these will run the application on your local machine. You can either serve with a wsgi front (like it would be within the container), or without.
