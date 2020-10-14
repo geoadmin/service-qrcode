@@ -5,13 +5,59 @@
 | develop | ![Build Status](https://codebuild.eu-central-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoibVJMdm9sbXA4cU1YcWtFMml1UVQwQ2tmdzQ3Z0ZsOFBjVDlsb1NNNTFwZURlWE9qdENiVytId0VzVkJpblBvTmxqVEllSEt0cnlVcXNNR2pqRTNESjRNPSIsIml2UGFyYW1ldGVyU3BlYyI6IkdsNE1FbkZka0hqTFFscjAiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=develop) |
 | master | ![Build Status](https://codebuild.eu-central-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoibVJMdm9sbXA4cU1YcWtFMml1UVQwQ2tmdzQ3Z0ZsOFBjVDlsb1NNNTFwZURlWE9qdENiVytId0VzVkJpblBvTmxqVEllSEt0cnlVcXNNR2pqRTNESjRNPSIsIml2UGFyYW1ldGVyU3BlYyI6IkdsNE1FbkZka0hqTFFscjAiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master) |
 
-## Summary of the project
+## Table of content
 
-A simple REST microservice meant to return a QR code from an URL, using Flask and Gunicorn, with docker containers as a mean of deployment.
+- [Description](#description)
+- [Dependencies](#dependencies)
+- [Service API](#service-api)
+- [Local Development](#local-development)
+- [Deployment](#deployment)
 
-## How to run locally
+## Description
 
-### Dependencies
+A simple REST Microservice that returns a QR code from a given URL, using Flask and Gunicorn, with docker containers as a mean of deployment.
+
+## Dependencies
+
+This service doesn't have any external dependencies.
+
+## Service API
+
+This service has two endpoints that are summarized below
+
+- [checker GET](#checker-get)
+- [generate POST](#generate-post)
+
+A detailed descriptions of the endpoints can be found in the [OpenAPI Spec](openapi.yaml).
+
+### Staging Environments
+
+| Environments | URL |
+|--------------|-----|
+| DEV          | [https://service-qrcode.bgdi-dev.swisstopo.cloud/v4/qrcode/](https://service-qrcode.bgdi-dev.swisstopo.cloud/v4/qrcode/)  |
+| INT          | [https://service-qrcode.bgdi-int.swisstopo.cloud/v4/qrcode/](https://service-qrcode.bgdi-int.swisstopo.cloud/v4/qrcode/)  |
+| PROD         | [https://service-qrcode.bgdi-prod.swisstopo.cloud/v4/qrcode/](https://service-qrcode.bgdi-int.swisstopo.cloud/v4/qrcode/) |
+
+### checker GET
+
+This is a simple route meant to test if the server is up.
+
+| Path | Method | Argument | Response Type |
+|------|--------|----------|---------------|
+| /v4/qrcode/checker | GET | - | application/json |
+
+### generate POST
+
+This route takes an url in the json payload, check if the hostname and domain are part of allowed names and domains, then
+create a QR Code from that URL and return it in a json answer.
+
+| Path | Method | Argument | Content Type | Content | Response Type |
+|------|--------|----------|--------------|---------|---------------|
+| /v4/qrcode/generate | POST | - | application/json | `{"url": "https://map.geo.admin.ch"}` | image/png |
+
+## Local Development
+
+### Make Dependencies
 
 The **Make** targets assume you have **bash**, **curl**, **tar**, **docker** and **docker-compose** installed.
 
@@ -63,22 +109,7 @@ To stop serving through containers,
 
 Is the command you're looking for.
 
-## Endpoints
-
-### /checker GET
-
-this is a simple route meant to test if the server is up.
-
-### /generate POST
-
-This route takes a shortened url, check if the hostname and domain are part of allowed hostnames and domains, then
-create a QR Code from that shortened URL.
-
-For more informations about endpoints look at the [OpenAPI Sepc](openapi.yaml)
-
-## Deploying the project and continuous integration
-
-When creating a PR, terraform should run a codebuild job to test, build and push automatically your PR as a tagged container.
+## Deployment
 
 This service is to be deployed to the Kubernetes cluster once it is merged.
 
