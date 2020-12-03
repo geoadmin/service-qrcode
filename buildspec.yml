@@ -8,6 +8,7 @@ env:
     USER: "aws_code_build"
     TEST_REPORT_DIR: "./tests/report"
     TEST_REPORT_FILE: "nose2-junit.xml"
+    PIPENV_NOSPIN: 1
   parameter-store:
     CI_DOCKERHUB_USER: "/dockerhub/user"
     CI_DOCKERHUB_PASSWORD: "/dockerhub/password"
@@ -31,11 +32,11 @@ phases:
           GITHUB_BRANCH="$(git branch -a --contains HEAD | sed -n 2p | awk '{ printf $1 }')";
           export GITHUB_BRANCH=${GITHUB_BRANCH#remotes/origin/};
         fi
-      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - export COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - export IMAGE_TAG="${GITHUB_BRANCH}.${COMMIT_HASH}"
       - echo "GITHUB_BRANCH=${GITHUB_BRANCH} COMMIT_HASH=${COMMIT_HASH} IMAGE_TAG=${IMAGE_TAG}"
       - echo "creating a clean environment"
-      - make clean setup
+      - make ci
   build:
     commands:
       - echo Build started on $(date)
@@ -43,7 +44,12 @@ phases:
       - export DOCKER_IMG_TAG_HASH=${DOCKER_IMG_TAG_BASE}.${COMMIT_HASH}
       - export DOCKER_IMG_TAG_LATEST=${DOCKER_IMG_TAG_BASE}.latest
       - echo "Building docker image with tags ${DOCKER_IMG_TAG_HASH} and ${DOCKER_IMG_TAG_LATEST}"
-      - docker build -t ${DOCKER_IMG_TAG_HASH} -t ${DOCKER_IMG_TAG_LATEST} .
+      - >
+        docker build
+        --build-arg GIT_HASH="${COMMIT_HASH}"
+        --build-arg GIT_BRANCH="${GITHUB_BRANCH}"
+        --build-arg AUTHOR="CI"
+        -t ${DOCKER_IMG_TAG_HASH} -t ${DOCKER_IMG_TAG_LATEST} .
 
   post_build:
     commands:

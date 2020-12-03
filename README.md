@@ -59,7 +59,7 @@ create a QR Code from that URL and return it in a json answer.
 
 ### Make Dependencies
 
-The **Make** targets assume you have **bash**, **curl**, **tar**, **docker** and **docker-compose** installed.
+The **Make** targets assume you have **python3.7**, **pipenv**, **bash**, **curl**, **tar**, **docker** and **docker-compose** installed.
 
 ### Setting up to work
 
@@ -108,6 +108,37 @@ To stop serving through containers,
     make shutdown
 
 Is the command you're looking for.
+
+## Docker
+
+The service is encapsulated in a Docker image. Images are pushed on the public [Dockerhub](https://hub.docker.com/r/swisstopo/service-qrcode/tags) registry. From each github PR that are merged into develop branch, one Docker image is built and pushed with the following tag:
+
+- develop.latest
+
+From each github PR that are merged into master, one Docker image is built an pushed with the following tag:
+
+- master.GIT_HASH
+
+Each images contains the following metadata:
+
+- author
+- git.branch
+- git.hash
+- git.dirty
+
+These metadata can be seen directly on the dockerhub registry in the image layers or can be read with the following command
+
+```bash
+# NOTE: jq is only used for pretty printing the json output,
+# you can install it with `apt install jq` or simply enter the command without it
+docker image inspect --format='{{json .Config.Labels}}' swisstopo/service-qrcode:develop.latest | jq
+```
+
+You can also check these metadata on a running container as follow
+
+```bash
+docker ps --format="table {{.ID}}\t{{.Image}}\t{{.Labels}}"
+```
 
 ## Deployment
 
