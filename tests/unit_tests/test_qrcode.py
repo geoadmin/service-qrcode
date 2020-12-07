@@ -2,6 +2,7 @@ import json
 import unittest
 
 from app import app
+from app.version import APP_VERSION
 
 
 class QrCodeTests(unittest.TestCase):
@@ -20,7 +21,7 @@ class QrCodeTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
-        self.assertEqual(response.json, {"message": "OK", "success": True})
+        self.assertEqual(response.json, {"message": "OK", "success": True, "version": APP_VERSION})
 
     def test_generate_errors(self):
         response = self.app.get(f"{self.route_prefix}/generate")
