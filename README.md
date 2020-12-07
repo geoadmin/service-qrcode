@@ -10,7 +10,9 @@
 - [Description](#description)
 - [Dependencies](#dependencies)
 - [Service API](#service-api)
+- [Versioning](#versioning)
 - [Local Development](#local-development)
+- [Docker](#docker)
 - [Deployment](#deployment)
 
 ## Description
@@ -55,11 +57,17 @@ create a QR Code from that URL and return it in a json answer.
 |------|--------|----------|--------------|---------|---------------|
 | /v4/qrcode/generate | POST | - | application/json | `{"url": "https://map.geo.admin.ch"}` | image/png |
 
+## Versioning
+
+This service uses [SemVer](https://semver.org/) as versioning scheme. The versioning is automatically handled by `.github/workflows/main.yml` file.
+
+See also [Git Flow - Versioning](https://github.com/geoadmin/doc-guidelines/blob/master/GIT_FLOW.md#versioning) for more information on the versioning guidelines.
+
 ## Local Development
 
 ### Make Dependencies
 
-The **Make** targets assume you have **bash**, **curl**, **tar**, **docker** and **docker-compose** installed.
+The **Make** targets assume you have **python3.7**, **pipenv**, **bash**, **curl**, **tar**, **docker** and **docker-compose** installed.
 
 ### Setting up to work
 
@@ -108,6 +116,39 @@ To stop serving through containers,
     make shutdown
 
 Is the command you're looking for.
+
+## Docker
+
+The service is encapsulated in a Docker image. Images are pushed on the public [Dockerhub](https://hub.docker.com/r/swisstopo/service-qrcode/tags) registry. From each github PR that is merged into develop branch, one Docker image is built and pushed with the following tags:
+
+- `develop.latest`
+- `develop.CURRENT_VERSION-beta.INCREMENTAL_NUMBER`
+
+From each github PR that is merged into master, one Docker image is built an pushed with the following tag:
+
+- `master.VERSION`
+
+Each image contains the following metadata:
+
+- author
+- git.branch
+- git.hash
+- git.dirty
+- version
+
+These metadata can be seen directly on the dockerhub registry in the image layers or can be read with the following command
+
+```bash
+# NOTE: jq is only used for pretty printing the json output,
+# you can install it with `apt install jq` or simply enter the command without it
+docker image inspect --format='{{json .Config.Labels}}' swisstopo/service-qrcode:develop.latest | jq
+```
+
+You can also check these metadata on a running container as follows
+
+```bash
+docker ps --format="table {{.ID}}\t{{.Image}}\t{{.Labels}}"
+```
 
 ## Deployment
 
