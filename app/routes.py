@@ -12,6 +12,7 @@ from app import app
 from app.helpers import make_error_msg
 from app.helpers.route import prefix_route
 from app.helpers.url import validate_url
+from app.version import APP_VERSION
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ app.route = prefix_route(app.route, '/v4/qrcode')
 
 @app.route('/checker', methods=['GET'])
 def check():
-    return make_response(jsonify({'success': True, 'message': 'OK'}))
+    return make_response(jsonify({'success': True, 'message': 'OK', 'version': APP_VERSION}))
 
 
 @app.route('/generate', methods=['POST'])
