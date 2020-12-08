@@ -21,4 +21,3 @@ jobs:
           WITH_V: true
           RELEASE_BRANCHES: master
           TAG_CONTEXT: repo
-          INITIAL_VERSION: 0.1.0
