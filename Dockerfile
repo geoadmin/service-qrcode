@@ -27,7 +27,7 @@ LABEL version=$VERSION
 LABEL author=$AUTHOR
 
 # Overwrite the version.py from source with the actual version
-RUN echo "APP_VERSION = '$VERSION'" > /app/version.py
+RUN echo "APP_VERSION = '$VERSION'" > /app/app/version.py
 
 USER geoadmin
 
