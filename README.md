@@ -7,13 +7,22 @@
 
 ## Table of content
 
+- [Table of content](#table-of-content)
 - [Description](#description)
 - [Dependencies](#dependencies)
 - [Service API](#service-api)
+  - [Staging Environments](#staging-environments)
+  - [checker GET](#checker-get)
+  - [generate POST](#generate-post)
 - [Versioning](#versioning)
 - [Local Development](#local-development)
+  - [Make Dependencies](#make-dependencies)
+  - [Setting up to work](#setting-up-to-work)
+  - [Linting and formatting your work](#linting-and-formatting-your-work)
+  - [Test your work](#test-your-work)
 - [Docker](#docker)
 - [Deployment](#deployment)
+  - [Deployment configuration](#deployment-configuration)
 
 ## Description
 
@@ -122,11 +131,11 @@ Is the command you're looking for.
 The service is encapsulated in a Docker image. Images are pushed on the public [Dockerhub](https://hub.docker.com/r/swisstopo/service-qrcode/tags) registry. From each github PR that is merged into develop branch, one Docker image is built and pushed with the following tags:
 
 - `develop.latest`
-- `develop.CURRENT_VERSION-beta.INCREMENTAL_NUMBER`
+- `CURRENT_VERSION-beta.INCREMENTAL_NUMBER`
 
 From each github PR that is merged into master, one Docker image is built an pushed with the following tag:
 
-- `master.VERSION`
+- `VERSION`
 
 Each image contains the following metadata:
 
