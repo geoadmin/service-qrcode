@@ -74,7 +74,7 @@ phases:
           docker push ${DOCKER_IMG_TAG}
         fi
       - |
-        if [ "${GITHUB_BRANCH}" = "develop" ]; then
+        if [ "${GITHUB_BRANCH}" = "develop" ] || [ "${GITHUB_BRANCH}" = "master" ]; then
           echo "Pushing ${DOCKER_IMG_TAG} and ${DOCKER_IMG_TAG_LATEST} to dockerhub"
           docker push ${DOCKER_IMG_TAG}
           docker push ${DOCKER_IMG_TAG_LATEST}
