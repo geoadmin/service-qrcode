@@ -2,16 +2,14 @@ version: 0.2
 
 env:
   variables:
-    IMAGE_BASE_NAME: "swisstopo/service-qrcode"
+    IMAGE_BASE_NAME: "service-qrcode"
+    REGISTRY: "974517877189.dkr.ecr.eu-central-1.amazonaws.com"
     SHELL: /bin/bash
     AWS_DEFAULT_REGION: eu-central-1
     USER: "aws_code_build"
     TEST_REPORT_DIR: "./tests/report"
     TEST_REPORT_FILE: "nose2-junit.xml"
     PIPENV_NOSPIN: 1
-  parameter-store:
-    CI_DOCKERHUB_USER: "/dockerhub/user"
-    CI_DOCKERHUB_PASSWORD: "/dockerhub/password"
 
 phases:
   install:
@@ -19,8 +17,14 @@ phases:
       docker: 18
     commands:
       - echo "Installing necessary softwares"
-      - docker login -u ${CI_DOCKERHUB_USER} -p ${CI_DOCKERHUB_PASSWORD}
-      - apt-get update && apt-get install -y docker-compose python3-pip
+      - apt-get update && apt-get install -y docker-compose python3-pip pass gnupg2
+      - echo "Install aws cli v2 for docker login to ECR registry"
+      - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      - unzip awscliv2.zip
+      - ./aws/install
+      - aws --version
+      - echo "Login to AWS ECR docker registry"
+      - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY}
   pre_build:
     commands:
       - echo "export of the image tag for build and push purposes"
@@ -40,11 +44,11 @@ phases:
   build:
     commands:
       - echo Build started on $(date)
-      - export DOCKER_IMG_TAG=${IMAGE_BASE_NAME}:${GITHUB_TAG}
-      - export DOCKER_IMG_TAG_LATEST=${IMAGE_BASE_NAME}:${GITHUB_BRANCH}.latest
+      - export DOCKER_IMG_TAG=${REGISTRY}/${IMAGE_BASE_NAME}:${GITHUB_TAG}
+      - export DOCKER_IMG_TAG_LATEST=${REGISTRY}/${IMAGE_BASE_NAME}:${GITHUB_BRANCH}.latest
       - |-
         if [ "${GITHUB_TAG}" = "" ] ; then
-          export DOCKER_IMG_TAG=${IMAGE_BASE_NAME}:${GITHUB_BRANCH}.${GITHUB_COMMIT}
+          export DOCKER_IMG_TAG=${REGISTRY}/${IMAGE_BASE_NAME}:${GITHUB_BRANCH}.${GITHUB_COMMIT}
           export GITHUB_TAG=${GITHUB_COMMIT}
         fi
       - echo "Building docker image with tags ${DOCKER_IMG_TAG} and ${DOCKER_IMG_TAG_LATEST}"
