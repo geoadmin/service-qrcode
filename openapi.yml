@@ -1,0 +1,119 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Service QRCode
+  description: >-
+    A simple REST Microservice that returns a QR code from a given URL, using Flask and Gunicorn,
+    with docker containers as a mean of deployment.
+
+paths:
+  /v4/qrcode/checker:
+    get:
+      summary: Route to check if the service is up.
+      operationId: checker
+      tags:
+        - checker
+      responses:
+        "200":
+          description: Returning OK.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Always true for 200 response.
+                  message:
+                    type: string
+                  version:
+                    type: string
+                    description: Application version string (SemVer 2.0)
+                example:
+                  success: true
+                  message: "OK"
+                  version: "v0.2.0-beta.1"
+        "500":
+          description: Unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+                example:
+                  success: false
+                  error:
+                    code: 500
+                    message: "An internal error occurred"
+
+  /v4/qrcode/generate:
+    post:
+      summary: Generate a QR code describing the given URL.
+      operationId: generateQrCode
+      tags:
+        - generation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - url
+              properties:
+                url:
+                  type: string
+                  description: The url for which a QR code needs to be generated.
+            example: { url: "https://example.admin.ch" }
+      responses:
+        "200":
+          description: Returning a QR Code describing the link.
+          content:
+            image/png:
+              schema:
+                type: object
+          example:
+
+        "400":
+          description: >-
+            Bad Requests from the client. This can be caused by the absence of the url parameter,
+            the host can't be determined from the request or the host/the domain is/are not part of
+            the authorized hosts / domains.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+                example:
+                  success: false
+                  error:
+                    code: 400
+                    message: "The property 'url' is missing from the request body"
+
+        "500":
+          description: Unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+                example:
+                  success: false
+                  error:
+                    code: 500
+                    message: "An internal error occurred during the QR Code generation"
+
+components:
+  schemas:
+    error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Always false in case of error.
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: Error code.
+            message:
+              type: string
+              description: Description of the error.
