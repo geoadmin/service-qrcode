@@ -16,7 +16,11 @@ REQUIREMENTS_TIMESTAMP = $(TIMESTAMPS)/.requirements.timestamp
 DEV_REQUIREMENTS_TIMESTAMP = $(TIMESTAMPS)/.dev-requirements.timestamps
 
 # Docker variables
-DOCKER_IMG_LOCAL_TAG = swisstopo/$(SERVICE_NAME):local
+DOCKER_REGISTRY = 974517877189.dkr.ecr.eu-central-1.amazonaws.com
+DOCKER_IMG_LOCAL_TAG = $(DOCKER_REGISTRY)/$(SERVICE_NAME):local
+
+# AWS variables
+AWS_DEFAULT_REGION = eu-central-1
 
 # Find all python files that are not inside a hidden directory (directory starting with .)
 PYTHON_FILES := $(shell find ./* -type f -name "*.py" -print)
@@ -66,6 +70,7 @@ help:
 	@echo "- serve              Run the project using the flask debug server. Port can be set by Env variable HTTP_PORT (default: 5000)"
 	@echo "- gunicornserve      Run the project using the gunicorn WSGI server. Port can be set by Env variable DEBUG_HTTP_PORT (default: 5000)"
 	@echo -e " \033[1mDocker TARGETS\033[0m "
+	@echo "- dockerlogin        Login to the AWS ECR registery for pulling/pushing docker images"
 	@echo "- dockerbuild        Build the project localy (with tag := $(DOCKER_IMG_LOCAL_TAG)) using the gunicorn WSGI server inside a container"
 	@echo "- dockerpush         Build and push the project localy (with tag := $(DOCKER_IMG_LOCAL_TAG))"
 	@echo "- dockerrun          Run the project using the gunicorn WSGI server inside a container (exposed port: 5000)"
@@ -130,6 +135,11 @@ gunicornserve: $(REQUIREMENTS_TIMESTAMP)
 
 
 # Docker related functions.
+
+.PHONY: dockerlogin
+dockerlogin:
+	aws --profile swisstopo-bgdi-builder ecr get-login-password --region $(AWS_DEFAULT_REGION) | docker login --username AWS --password-stdin $(DOCKER_REGISTRY)
+
 
 .PHONY: dockerbuild
 dockerbuild:
