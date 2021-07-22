@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 # Standard Flask application initialisation
 
 app = Flask(__name__)
+app.config.from_mapping({"TRAP_HTTP_EXCEPTIONS": True})
 app.wsgi_app = ReverseProxy(app.wsgi_app, script_name='/')
 
 
@@ -37,30 +38,21 @@ def add_cors_header(response):
 def validate_origin():
     if 'Origin' not in request.headers:
         logger.error('Origin header is not set')
-        abort(make_error_msg(403, 'Not allowed'))
+        abort(403, 'Not allowed')
     if not re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin']):
         logger.error('Origin=%s is not allowed', request.headers['Origin'])
-        abort(make_error_msg(403, 'Not allowed'))
+        abort(403, 'Not allowed')
 
 
 # Register error handler to make sure that every error returns a json answer
-@app.errorhandler(HTTPException)
+@app.errorhandler(Exception)
 def handle_exception(err):
     """Return JSON instead of HTML for HTTP errors."""
-    logger.error('Request failed code=%d description=%s', err.code, err.description)
-    return make_error_msg(err.code, err.description)
+    if isinstance(err, HTTPException):
+        logger.error(err)
+        return make_error_msg(err.code, err.description)
+    logger.exception('Unexpected exception: %s', err)
+    return make_error_msg(500, "Internal server error, please consult logs")
 
 
-from app import routes  # pylint: disable=wrong-import-position
-
-
-def main():
-    app.run()
-
-
-if __name__ == '__main__':
-    """
-    Entrypoint for the application. At the moment, we do nothing specific, but there might be
-    preparatory steps in the future
-    """
-    main()
+from app import routes  # isort:skip pylint: disable=wrong-import-position
