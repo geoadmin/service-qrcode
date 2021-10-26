@@ -286,7 +286,6 @@ good-names=i,
            ex,
            fd,
            Run,
-           dictionary,
            _
 
 # Good variable names regexes, separated by a comma. If names match any regex,

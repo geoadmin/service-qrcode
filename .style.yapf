@@ -22,6 +22,6 @@ dedent_closing_brackets=True
 # (unless needed).
 split_all_top_level_comma_separated_values=True
 
-# Split lines longuer than 100 characters (this only applies to code not to
+# Split lines longer than 100 characters (this only applies to code not to
 # comment and docstring)
 column_limit=100

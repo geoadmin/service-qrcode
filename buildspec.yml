@@ -16,7 +16,6 @@ phases:
     runtime-versions:
       python: 3.7
     commands:
-      - echo "Installing necessary softwares"
       - aws --version
       - echo "Login to AWS ECR docker registry"
       - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY}

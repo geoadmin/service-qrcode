@@ -37,7 +37,7 @@ This service doesn't have any external dependencies.
 This service has two endpoints that are summarized below
 
 - [checker GET](#checker-get)
-- [generate POST](#generate-post)
+- [generate GET](#generate-get)
 
 A detailed descriptions of the endpoints can be found in the [OpenAPI Spec](openapi.yaml).
 
@@ -57,14 +57,14 @@ This is a simple route meant to test if the server is up.
 |------|--------|----------|---------------|
 | /v4/qrcode/checker | GET | - | application/json |
 
-### generate POST
+### generate GET
 
 This route takes an url in the json payload, check if the hostname and domain are part of allowed names and domains, then
 create a QR Code from that URL and return it in a json answer.
 
-| Path | Method | Argument | Content Type | Content | Response Type |
-|------|--------|----------|--------------|---------|---------------|
-| /v4/qrcode/generate | POST | - | application/json | `{"url": "https://map.geo.admin.ch"}` | image/png |
+| Path | Method | Argument | Response Type |
+|------|--------|----------|---------------|
+| /v4/qrcode/generate | GET | url: unencoded URL to be QR coded | image/png |
 
 ## Versioning
 
@@ -115,9 +115,9 @@ This will serve the application through Flask without any wsgi in front.
 
     make gunicornserve
 
-This will serve the application with the Gunicorn layer in front of the application
+This will serve the application with the Gunicorn layer in front of the application (replace `...` with `.*` for a broad test, or some domain regex for more specific testing)
 
-    make dockerrun
+    ALLOWED_DOMAINS=... make dockerrun
 
 This will serve the application with the wsgi server, inside a container.
 To stop serving through containers,

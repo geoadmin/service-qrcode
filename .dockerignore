@@ -11,6 +11,7 @@ docker-compose.yml
 docker-compose.yml.in
 .docker
 .dockerignore
+Dockerfile
 
 # Python
 **/*.pyc
@@ -20,10 +21,12 @@ docker-compose.yml.in
 tests
 Makefile
 .venv
-.pylintrc
 .isort.cfg
+.pylintrc
 .style.yapf
 .timestamps
-.vscode
-service_qrcode.py
+service_launcher.py
+lib-makefiles/*
 buildspec.yml
+logs
+nose2-junit.xml
