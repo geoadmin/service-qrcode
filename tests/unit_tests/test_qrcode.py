@@ -1,4 +1,3 @@
-import json
 import unittest
 
 from app import app
@@ -11,14 +10,16 @@ class QrCodeTests(unittest.TestCase):
         self.app = app.test_client()
         self.assertEqual(app.debug, False)
         self.route_prefix = "/v4/qrcode"
+        self.valid_origin_header = {
+            # see .env.test
+            'Origin': 'some_random_domain'
+        }
 
     def tearDown(self):
         pass
 
     def test_checker(self):
-        response = self.app.get(
-            f"{self.route_prefix}/checker", headers={"Origin": "map.geo.admin.ch"}
-        )
+        response = self.app.get(f"{self.route_prefix}/checker", headers=self.valid_origin_header)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "application/json")
         self.assertEqual(response.json, {"message": "OK", "success": True, "version": APP_VERSION})
@@ -34,10 +35,8 @@ class QrCodeTests(unittest.TestCase):
                 }, "success": False
             }
         )
-        response = self.app.get(
-            f"{self.route_prefix}/generate", headers={"Origin": "map.geo.admin.ch"}
-        )
-        self.assertEqual(response.status_code, 405, msg="GET method is not allowed")
+        response = self.app.post(f"{self.route_prefix}/generate", headers=self.valid_origin_header)
+        self.assertEqual(response.status_code, 405, msg="POST method is not allowed")
         self.assertEqual(response.content_type, "application/json")
         self.assertEqual(
             response.json,
@@ -50,83 +49,37 @@ class QrCodeTests(unittest.TestCase):
             }
         )
 
-        response = self.app.post(
-            f"{self.route_prefix}/generate", headers={"Origin": "map.geo.admin.ch"}
+        response = self.app.get(f"{self.route_prefix}/generate", headers=self.valid_origin_header)
+        self.assertEqual(
+            response.status_code, 400, msg="Should respond with a 400 when URL param is missing"
         )
-        self.assertEqual(response.status_code, 400, msg="JSON body is requested")
         self.assertEqual(response.content_type, "application/json")
         self.assertEqual(
-            response.json,
-            {
-                "error":
-                    {
-                        "code": 400,
-                        "message": "The property 'url' is missing from the request body"
-                    },
-                "success": False
-            }
-        )
-
-        response = self.app.post(
-            f"{self.route_prefix}/generate",
-            data=json.dumps({"url": "https://example.com"}),
-            content_type="text/html",
-            headers={"Origin": "map.geo.admin.ch"}
-        )
-        self.assertEqual(response.status_code, 400, msg="Only JSON body is accepted")
-        self.assertEqual(response.content_type, "application/json")
-        self.assertEqual(
-            response.json,
-            {
-                "error":
-                    {
-                        "code": 400,
-                        "message": "The property 'url' is missing from the request body"
-                    },
-                "success": False
+            response.json, {
+                "error": {
+                    "code": 400, "message": "Missing parameter 'url'"
+                }, "success": False
             }
         )
 
     def test_generate_domain_restriction(self):
-        response = self.app.post(
-            f"{self.route_prefix}/generate",
-            data=json.dumps({"url": "https://map.geo.admin.ch/test"}),
+        response = self.app.get(
+            f"{self.route_prefix}/generate?url=https://some_random_domain/test",
             content_type="application/json",
-            headers={"Origin": "map.geo.admin.ch"}
+            headers=self.valid_origin_header
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content_type, "image/png")
-
-        response = self.app.post(
-            f"{self.route_prefix}/generate",
-            data=json.dumps({"url": "https://test.bgdi.ch/test"}),
-            content_type="application/json",
-            headers={"Origin": "map.geo.admin.ch"}
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content_type, "image/png")
-        self.assertEqual(response.headers['Access-Control-Allow-Origin'], "map.geo.admin.ch")
+        self.assertEqual(response.headers['Access-Control-Allow-Origin'], "some_random_domain")
         self.assertEqual(response.headers['Access-Control-Allow-Methods'], "GET, POST, OPTIONS")
 
-        response = self.app.post(
-            f"{self.route_prefix}/generate",
-            data=json.dumps({"url": "https://example.swisstopo.cloud/test"}),
+        response = self.app.get(
+            f"{self.route_prefix}/generate?url=https://www.example.com/test",
             content_type="application/json",
-            headers={"Origin": "map.geo.admin.ch"}
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.content_type, "image/png")
-        self.assertEqual(response.headers['Access-Control-Allow-Origin'], "map.geo.admin.ch")
-        self.assertEqual(response.headers['Access-Control-Allow-Methods'], "GET, POST, OPTIONS")
-
-        response = self.app.post(
-            f"{self.route_prefix}/generate",
-            data=json.dumps({"url": "https://www.example.com/test"}),
-            content_type="application/json",
-            headers={"Origin": "map.geo.admin.ch"}
+            headers=self.valid_origin_header
         )
         self.assertEqual(response.status_code, 400, msg="Domain restriction not applied")
-        self.assertEqual(response.headers['Access-Control-Allow-Origin'], "map.geo.admin.ch")
+        self.assertEqual(response.headers['Access-Control-Allow-Origin'], "some_random_domain")
         self.assertEqual(response.headers['Access-Control-Allow-Methods'], "GET, POST, OPTIONS")
         self.assertEqual(response.content_type, "application/json")
         self.assertEqual(
@@ -137,9 +90,8 @@ class QrCodeTests(unittest.TestCase):
             }
         )
 
-        response = self.app.post(
-            f"{self.route_prefix}/generate",
-            data=json.dumps({"url": "https://www.example.com/test"}),
+        response = self.app.get(
+            f"{self.route_prefix}/generate?url=https://www.example.com/test",
             content_type="application/json",
             headers={"Origin": "www.example.com"}
         )

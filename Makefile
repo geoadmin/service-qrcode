@@ -6,18 +6,28 @@ SERVICE_NAME := service-qrcode
 
 CURRENT_DIR := $(shell pwd)
 
+# Docker metadata
+GIT_HASH = `git rev-parse HEAD`
+GIT_HASH_SHORT = `git rev-parse --short HEAD`
+GIT_BRANCH = `git symbolic-ref HEAD --short 2>/dev/null`
+GIT_DIRTY = `git status --porcelain`
+GIT_TAG = `git describe --tags || echo "no version info"`
+AUTHOR = $(USER)
+
+
 # Test report configuration
 TEST_REPORT_DIR ?= $(CURRENT_DIR)/tests/report
 TEST_REPORT_FILE ?= nose2-junit.xml
 
 # general targets timestamps
 TIMESTAMPS = .timestamps
-REQUIREMENTS_TIMESTAMP = $(TIMESTAMPS)/.requirements.timestamp
-DEV_REQUIREMENTS_TIMESTAMP = $(TIMESTAMPS)/.dev-requirements.timestamps
+LOGS_DIR = $(PWD)/logs
+REQUIREMENTS := $(TIMESTAMPS) $(LOGS_DIR) $(PIP_FILE) $(PIP_FILE_LOCK)
+
 
 # Docker variables
 DOCKER_REGISTRY = 974517877189.dkr.ecr.eu-central-1.amazonaws.com
-DOCKER_IMG_LOCAL_TAG = $(DOCKER_REGISTRY)/$(SERVICE_NAME):local
+DOCKER_IMG_LOCAL_TAG := $(DOCKER_REGISTRY)/$(SERVICE_NAME):local-$(USER)-$(GIT_HASH_SHORT)
 
 # AWS variables
 AWS_DEFAULT_REGION = eu-central-1
@@ -30,6 +40,7 @@ PIP_FILE = Pipfile
 PIP_FILE_LOCK = Pipfile.lock
 
 # default configuration
+ENV_FILE ?= .env.local
 HTTP_PORT ?= 5000
 
 # Commands
@@ -42,12 +53,7 @@ ISORT := $(PIPENV_RUN) isort
 NOSE := $(PIPENV_RUN) nose2
 PYLINT := $(PIPENV_RUN) pylint
 
-# Docker metadata
-GIT_HASH := `git rev-parse HEAD`
-GIT_BRANCH := `git symbolic-ref HEAD --short 2>/dev/null`
-GIT_DIRTY := `git status --porcelain`
-GIT_TAG := `git describe --tags || echo "no version info"`
-AUTHOR := $(USER)
+
 
 all: help
 
@@ -74,39 +80,52 @@ help:
 	@echo "- dockerbuild        Build the project localy (with tag := $(DOCKER_IMG_LOCAL_TAG)) using the gunicorn WSGI server inside a container"
 	@echo "- dockerpush         Build and push the project localy (with tag := $(DOCKER_IMG_LOCAL_TAG))"
 	@echo "- dockerrun          Run the project using the gunicorn WSGI server inside a container (exposed port: 5000)"
-	@echo "- shutdown           Stop the aforementioned container"
 	@echo -e " \033[1mCLEANING TARGETS\033[0m "
 	@echo "- clean              Clean genereated files"
 	@echo "- clean_venv         Clean python venv"
+	@echo "- clean_logs         Clean logs"
 
 
 # Build targets. Calling setup is all that is needed for the local files to be installed as needed.
 
 .PHONY: dev
-dev: $(DEV_REQUIREMENTS_TIMESTAMP)
+dev: $(REQUIREMENTS)
+	pipenv install --dev
 	pipenv shell
 
 
 .PHONY: setup
-setup: $(REQUIREMENTS_TIMESTAMP)
+setup: $(REQUIREMENTS)
+	pipenv install
 	pipenv shell
 
+
 .PHONY: ci
-ci: $(TIMESTAMPS) $(PIP_FILE) $(PIP_FILE_LOCK)
+ci: $(REQUIREMENTS)
 	# Create virtual env with all packages for development using the Pipfile.lock
 	pipenv sync --dev
+
 
 # linting target, calls upon yapf to make sure your code is easier to read and respects some conventions.
 
 .PHONY: format
-format: $(DEV_REQUIREMENTS_TIMESTAMP)
+format:
 	$(YAPF) -p -i --style .style.yapf $(PYTHON_FILES)
 	$(ISORT) $(PYTHON_FILES)
 
 
+.PHONY: ci-check-format
+ci-check-format: format
+	@if [[ -n `git status --porcelain --untracked-files=no` ]]; then \
+		>&2 echo "ERROR: the following files are not formatted correctly"; \
+		>&2 echo "'git status --porcelain' reported changes in those files after a 'make format' :"; \
+		>&2 git status --porcelain --untracked-files=no; \
+		exit 1; \
+	fi
+
 
 .PHONY: lint
-lint: $(DEV_REQUIREMENTS_TIMESTAMP)
+lint:
 	$(PYLINT) $(PYTHON_FILES)
 
 
@@ -117,21 +136,21 @@ format-lint: format lint
 # Test target
 
 .PHONY: test
-test: $(DEV_REQUIREMENTS_TIMESTAMP)
+test:
 	mkdir -p $(TEST_REPORT_DIR)
-	$(NOSE) -c tests/unittest.cfg --verbose --junit-xml-path $(TEST_REPORT_DIR)/$(TEST_REPORT_FILE) -s tests/
+	ENV_FILE=.env.test $(NOSE) -c tests/unittest.cfg --verbose --junit-xml-path $(TEST_REPORT_DIR)/$(TEST_REPORT_FILE) -s tests/
 
 
 # Serve targets. Using these will run the application on your local machine. You can either serve with a wsgi front (like it would be within the container), or without.
 
 .PHONY: serve
-serve: $(REQUIREMENTS_TIMESTAMP)
-	FLASK_APP=$(subst -,_,$(SERVICE_NAME)) FLASK_DEBUG=1 $(FLASK) run --host=0.0.0.0 --port=$(HTTP_PORT)
+serve: clean_logs $(LOGS_DIR)
+	ENV_FILE=$(ENV_FILE) LOGS_DIR=$(LOGS_DIR) FLASK_APP=$(subst -,_,$(SERVICE_NAME)) FLASK_DEBUG=1 $(FLASK) run --host=0.0.0.0 --port=$(HTTP_PORT)
 
 
 .PHONY: gunicornserve
-gunicornserve: $(REQUIREMENTS_TIMESTAMP)
-	$(PYTHON) wsgi.py
+gunicornserve: clean_logs $(LOGS_DIR)
+	ENV_FILE=$(ENV_FILE) LOGS_DIR=$(LOGS_DIR) $(PYTHON) wsgi.py
 
 
 # Docker related functions.
@@ -148,6 +167,7 @@ dockerbuild:
 		--build-arg GIT_BRANCH="$(GIT_BRANCH)" \
 		--build-arg GIT_DIRTY="$(GIT_DIRTY)" \
 		--build-arg VERSION="$(GIT_TAG)" \
+		--build-arg HTTP_PORT="$(HTTP_PORT)" \
 		--build-arg AUTHOR="$(AUTHOR)" -t $(DOCKER_IMG_LOCAL_TAG) .
 
 
@@ -157,14 +177,20 @@ dockerpush: dockerbuild
 
 
 .PHONY: dockerrun
-dockerrun: dockerbuild
-	HTTP_PORT=$(HTTP_PORT) docker-compose up
+dockerrun: clean_logs dockerbuild $(LOGS_DIR)
+	docker run \
+		-it -p $(HTTP_PORT):8080 \
+		--env-file=${PWD}/${ENV_FILE} \
+		--env LOGS_DIR=/logs \
+		--mount type=bind,source="${LOGS_DIR}",target=/logs \
+		$(DOCKER_IMG_LOCAL_TAG)
 
 
-.PHONY: shutdown
-shutdown:
-	HTTP_PORT=$(HTTP_PORT) docker-compose down
+ # Clean targets
 
+.PHONY: clean_logs
+clean_logs:
+	rm -rf $(LOGS_DIR)
 
 .PHONY: clean_venv
 clean_venv:
@@ -172,7 +198,7 @@ clean_venv:
 
 
 .PHONY: clean
-clean: clean_venv
+clean: clean_venv clean_logs
 	@# clean python cache files
 	find . -name __pycache__ -type d -print0 | xargs -I {} -0 rm -rf "{}"
 	rm -rf $(TEST_REPORT_DIR)
@@ -185,11 +211,6 @@ $(TIMESTAMPS):
 	mkdir -p $(TIMESTAMPS)
 
 
-$(REQUIREMENTS_TIMESTAMP): $(TIMESTAMPS) $(PIP_FILE) $(PIP_FILE_LOCK)
-	pipenv install
-	@touch $(REQUIREMENTS_TIMESTAMP)
+$(LOGS_DIR):
+	mkdir -p -m=777 $(LOGS_DIR)
 
-
-$(DEV_REQUIREMENTS_TIMESTAMP): $(TIMESTAMPS) $(PIP_FILE) $(PIP_FILE_LOCK)
-	pipenv install --dev
-	@touch $(DEV_REQUIREMENTS_TIMESTAMP)
