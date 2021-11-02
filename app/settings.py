@@ -18,3 +18,4 @@ if ALLOWED_DOMAINS_STRING is None or ALLOWED_DOMAINS_STRING == "":
     raise RuntimeError("Environment variable $ALLOWED_DOMAINS was not set")
 
 ALLOWED_DOMAINS = ALLOWED_DOMAINS_STRING.split(',')
+TRAP_HTTP_EXCEPTIONS = True

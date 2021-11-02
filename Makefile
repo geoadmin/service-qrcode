@@ -22,7 +22,7 @@ TEST_REPORT_FILE ?= nose2-junit.xml
 # general targets timestamps
 TIMESTAMPS = .timestamps
 LOGS_DIR = $(PWD)/logs
-REQUIREMENTS := $(TIMESTAMPS) $(VOLUMES_MINIO) $(LOGS_DIR) $(PIP_FILE) $(PIP_FILE_LOCK)
+REQUIREMENTS := $(TIMESTAMPS) $(LOGS_DIR) $(PIP_FILE) $(PIP_FILE_LOCK)
 
 
 # Docker variables
@@ -116,9 +116,10 @@ format:
 
 .PHONY: ci-check-format
 ci-check-format: format
-	@if [[ -n `git status --porcelain` ]]; then \
-	 	>&2 echo "ERROR: the following files are not formatted correctly:"; \
-		>&2 git status --porcelain; \
+	@if [[ -n `git status --porcelain --untracked-files=no` ]]; then \
+		>&2 echo "ERROR: the following files are not formatted correctly"; \
+		>&2 echo "'git status --porcelain' reported changes in those files after a 'make format' :"; \
+		>&2 git status --porcelain --untracked-files=no; \
 		exit 1; \
 	fi
 
@@ -144,7 +145,7 @@ test:
 
 .PHONY: serve
 serve: clean_logs $(LOGS_DIR)
-	ENV_FILE=$(ENV_FILE) LOGS_DIR=$(LOGS_DIR) FLASK_APP=service_launcher.py FLASK_DEBUG=1 $(FLASK) run --host=0.0.0.0 --port=$(HTTP_PORT)
+	ENV_FILE=$(ENV_FILE) LOGS_DIR=$(LOGS_DIR) FLASK_APP=$(subst -,_,$(SERVICE_NAME)) FLASK_DEBUG=1 $(FLASK) run --host=0.0.0.0 --port=$(HTTP_PORT)
 
 
 .PHONY: gunicornserve
@@ -200,7 +201,6 @@ clean_venv:
 clean: clean_venv clean_logs
 	@# clean python cache files
 	find . -name __pycache__ -type d -print0 | xargs -I {} -0 rm -rf "{}"
-	rm -rf $(PYTHON_LOCAL_DIR)
 	rm -rf $(TEST_REPORT_DIR)
 	rm -rf $(TIMESTAMPS)
 
@@ -213,3 +213,4 @@ $(TIMESTAMPS):
 
 $(LOGS_DIR):
 	mkdir -p -m=777 $(LOGS_DIR)
+

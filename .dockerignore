@@ -21,12 +21,12 @@ Dockerfile
 tests
 Makefile
 .venv
-.isort.cfg
 .pylintrc
+.isort.cfg
 .style.yapf
 .timestamps
-service_launcher.py
-lib-makefiles/*
+.vscode
+service_qrcode.py
 buildspec.yml
 logs
 nose2-junit.xml
