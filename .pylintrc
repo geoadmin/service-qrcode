@@ -62,11 +62,6 @@ confidence=
 # --disable=W".
 disable=missing-docstring,
     missing-module-docstring,
-    unused-argument,
-    unused-variable,
-    pointless-string-statement,
-    too-many-arguments,
-    too-few-public-methods,
     bad-continuation,   # bad-continuation doesn't comply with yapf, so lets
                         # yapf correct indentation continuation issue
     useless-object-inheritance,

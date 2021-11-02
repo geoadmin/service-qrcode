@@ -1,5 +1,4 @@
 import logging
-import os
 import re
 import time
 
@@ -12,7 +11,6 @@ from flask import request
 
 from app import settings
 from app.helpers.utils import ALLOWED_DOMAINS_PATTERN
-from app.helpers.utils import init_logging
 from app.helpers.utils import make_error_msg
 
 logger = logging.getLogger(__name__)
