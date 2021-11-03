@@ -1,6 +1,10 @@
 import unittest
+from urllib.parse import quote
+import io
 
 from flask import url_for
+from PIL import Image
+from pyzbar import pyzbar
 
 from app import app
 from app.version import APP_VERSION
@@ -104,3 +108,21 @@ class QrCodeTests(unittest.TestCase):
                 }, "success": False
             }
         )
+
+    def test_generate(self):
+        url_orig = f'https://some_random_domain/test?arg1=value2&arg2={quote("value with space & special character !?")}'
+        response = self.app.get(
+            url_for('generate_get'),
+            query_string={'url': url_orig},
+            headers=self.valid_origin_header
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content_type, "image/png")
+        self.assertEqual(response.headers['Access-Control-Allow-Origin'], "some_random_domain")
+        self.assertEqual(response.headers['Access-Control-Allow-Methods'], "GET, POST, OPTIONS")
+
+        # decode the qrcode image into the url
+        image = io.BytesIO(response.data)
+        data = pyzbar.decode(Image.open(image))
+        url_decoded = data[0].data.decode('utf-8')
+        self.assertEqual(url_orig, url_decoded, msg="Decoded url from image not equal to original")
