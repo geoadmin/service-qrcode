@@ -1,10 +1,11 @@
+import io
 import unittest
 from urllib.parse import quote
-import io
 
-from flask import url_for
 from PIL import Image
 from pyzbar import pyzbar
+
+from flask import url_for
 
 from app import app
 from app.version import APP_VERSION
@@ -110,7 +111,8 @@ class QrCodeTests(unittest.TestCase):
         )
 
     def test_generate(self):
-        url_orig = f'https://some_random_domain/test?arg1=value2&arg2={quote("value with space & special character !?")}'
+        long_string_quoted = "value with space & special character !?"
+        url_orig = f'https://some_random_domain/test?arg1=value2&arg2={quote(long_string_quoted)}'
         response = self.app.get(
             url_for('generate_get'),
             query_string={'url': url_orig},
