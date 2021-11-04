@@ -19,6 +19,9 @@ phases:
       - aws --version
       - echo "Login to AWS ECR docker registry"
       - aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${REGISTRY}
+      - echo "Installing softwares"
+      - apt-get update -q
+      - apt-get install -q -y libzbar0
   pre_build:
     commands:
       - echo "export of the image tag for build and push purposes"

@@ -30,3 +30,4 @@ service_qrcode.py
 buildspec.yml
 logs
 nose2-junit.xml
+.env*

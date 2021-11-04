@@ -9,14 +9,10 @@ from flask import make_response
 from flask import request
 
 from app import app
-from app.helpers.route import prefix_route
 from app.helpers.url import validate_url
 from app.version import APP_VERSION
 
 logger = logging.getLogger(__name__)
-
-# add route prefix
-app.route = prefix_route(app.route, '/v4/qrcode')
 
 
 @app.route('/checker', methods=['GET'])

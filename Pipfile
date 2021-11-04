@@ -18,6 +18,7 @@ yapf = "*"
 nose2 = "*"
 pylint = "*"
 pylint-flask = "*"
+pyzbar = "*"
 
 [requires]
 python_version = "3.7"

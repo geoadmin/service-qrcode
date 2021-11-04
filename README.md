@@ -13,14 +13,14 @@
 - [Service API](#service-api)
   - [Staging Environments](#staging-environments)
   - [checker GET](#checker-get)
-  - [generate POST](#generate-post)
+  - [generate GET](#generate-get)
 - [Versioning](#versioning)
 - [Local Development](#local-development)
   - [Make Dependencies](#make-dependencies)
   - [Setting up to work](#setting-up-to-work)
   - [Linting and formatting your work](#linting-and-formatting-your-work)
   - [Test your work](#test-your-work)
-- [Docker helpers](#docker-helpers)
+  - [Docker helpers](#docker-helpers)
 - [Deployment](#deployment)
   - [Deployment configuration](#deployment-configuration)
 
@@ -45,9 +45,9 @@ A detailed descriptions of the endpoints can be found in the [OpenAPI Spec](open
 
 | Environments | URL |
 |--------------|-----|
-| DEV          | [https://service-qrcode.bgdi-dev.swisstopo.cloud/v4/qrcode/](https://service-qrcode.bgdi-dev.swisstopo.cloud/v4/qrcode/)  |
-| INT          | [https://service-qrcode.bgdi-int.swisstopo.cloud/v4/qrcode/](https://service-qrcode.bgdi-int.swisstopo.cloud/v4/qrcode/)  |
-| PROD         | [https://service-qrcode.bgdi-prod.swisstopo.cloud/v4/qrcode/](https://service-qrcode.bgdi-int.swisstopo.cloud/v4/qrcode/) |
+| DEV          | [https://sys-map.dev.bgdi.ch/api/qrcode/](https://ssys-map.dev.bgdi.ch/api/qrcode/)  |
+| INT          | [https://sys-map.int.bgdi.ch/api/qrcode/](https://sys-map.int.bgdi.ch/api/qrcode/)  |
+| PROD         | [https://map.geo.admin.ch/api/qrcode/](https://map.geo.admin.ch/api/qrcode/) |
 
 ### checker GET
 
@@ -55,7 +55,7 @@ This is a simple route meant to test if the server is up.
 
 | Path | Method | Argument | Response Type |
 |------|--------|----------|---------------|
-| /v4/qrcode/checker | GET | - | application/json |
+| /checker | GET | - | application/json |
 
 ### generate GET
 
@@ -64,7 +64,7 @@ create a QR Code from that URL and return it in a json answer.
 
 | Path | Method | Argument | Response Type |
 |------|--------|----------|---------------|
-| /v4/qrcode/generate | GET | url: unencoded URL to be QR coded | image/png |
+| /generate | GET | url: unencoded URL to be QR coded | image/png |
 
 ## Versioning
 
@@ -84,9 +84,9 @@ First, you'll need to clone the repo
 
     git clone git@github.com:geoadmin/service-qrcode.git
 
-Then, you can run the setup target to ensure you have everything needed to develop, test and serve locally
+Then, you can run the `dev` target to ensure you have everything needed to develop, test and serve locally
 
-    make setup
+    make dev
 
 That's it, you're ready to work.
 
@@ -115,16 +115,11 @@ This will serve the application through Flask without any wsgi in front.
 
     make gunicornserve
 
-This will serve the application with the Gunicorn layer in front of the application (replace `...` with `.*` for a broad test, or some domain regex for more specific testing)
+This will serve the application with the Gunicorn layer in front of the application. It also add the route prefix `/api/qrcode`.
 
-    ALLOWED_DOMAINS=... make dockerrun
+    make dockerrun
 
 This will serve the application with the wsgi server, inside a container.
-To stop serving through containers,
-
-    make shutdown
-
-Is the command you're looking for.
 
 ### Docker helpers
 
@@ -175,9 +170,7 @@ make dockerpush
 
 ## Deployment
 
-This service is to be deployed to the Kubernetes cluster once it is merged.
-
-TO DO: give instructions to deploy to kubernetes.
+This service is to be deployed to the Kubernetes cluster. See [geoadmin/infra-kubernetes/services/service-qrcode](https://github.com/geoadmin/infra-kubernetes/tree/master/services/service-qrcode#readme)
 
 ### Deployment configuration
 
@@ -185,4 +178,5 @@ The service is configured by Environment Variable:
 
 | Env         | Default               | Description                            |
 |-------------|-----------------------|----------------------------------------|
-| LOGGING_CFG | logging-cfg-local.yml | Logging configuration file             |
+| LOGGING_CFG | `logging-cfg-local.yml` | Logging configuration file           |
+| ALLOWED_DOMAINS | `.*` | Comma separated list of regex that are allowed as domain in Origin header |

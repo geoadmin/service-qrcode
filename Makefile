@@ -42,6 +42,7 @@ PIP_FILE_LOCK = Pipfile.lock
 # default configuration
 ENV_FILE ?= .env.local
 HTTP_PORT ?= 5000
+ROUTE_PREFIX ?= /api/qrcode
 
 # Commands
 PIPENV_RUN := pipenv run
@@ -150,7 +151,7 @@ serve: clean_logs $(LOGS_DIR)
 
 .PHONY: gunicornserve
 gunicornserve: clean_logs $(LOGS_DIR)
-	ENV_FILE=$(ENV_FILE) LOGS_DIR=$(LOGS_DIR) $(PYTHON) wsgi.py
+	SCRIPT_NAME=$(ROUTE_PREFIX) ENV_FILE=$(ENV_FILE) LOGS_DIR=$(LOGS_DIR) $(PYTHON) wsgi.py
 
 
 # Docker related functions.
@@ -182,6 +183,7 @@ dockerrun: clean_logs dockerbuild $(LOGS_DIR)
 		-it -p $(HTTP_PORT):8080 \
 		--env-file=${PWD}/${ENV_FILE} \
 		--env LOGS_DIR=/logs \
+		--env SCRIPT_NAME=$(ROUTE_PREFIX) \
 		--mount type=bind,source="${LOGS_DIR}",target=/logs \
 		$(DOCKER_IMG_LOCAL_TAG)
 
