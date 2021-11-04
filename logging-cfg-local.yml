@@ -38,7 +38,8 @@ filters:
       - method
       - headers
       - remote_addr
-      - form
+      - args
+      - json
 
 formatters:
   standard:
@@ -47,7 +48,7 @@ formatters:
   verbose:
     (): logging_utilities.formatters.extra_formatter.ExtraFormatter
     format: "[%(asctime)s] %(levelname)-8s - %(name)-26s : %(message)s"
-    extra_fmt: " : url=%(request_url)s headers=%(request_headers)s payload=%(request_json)s"
+    extra_fmt: " : path=%(flask_request_path)s headers=%(flask_request_headers)s query=%(flask_request_args)s payload=%(flask_request_json)s"
   json:
     (): logging_utilities.formatters.json_formatter.JsonFormatter
     add_always_extra: True
@@ -58,6 +59,7 @@ formatters:
       - flask_request_headers
       - flask_request_json
       - flask_request_remote_addr
+      - flask_request_args
     remove_empty: True
     fmt:
       time: utc_isotime
@@ -71,6 +73,7 @@ formatters:
         path: flask_request_path
         method: flask_request_method
         headers: flask_request_headers
+        query: flask_request_args
         data: flask_request_json
         remote: flask_request_remote_addr
       exc_info: exc_info
