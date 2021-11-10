@@ -122,6 +122,10 @@ class QrCodeTests(unittest.TestCase):
         self.assertEqual(response.content_type, "image/png")
         self.assertEqual(response.headers['Access-Control-Allow-Origin'], "some_random_domain")
         self.assertEqual(response.headers['Access-Control-Allow-Methods'], "GET, POST, OPTIONS")
+        self.assertIn('Cache-Control', response.headers, msg="Cache control header missing")
+        self.assertIn(
+            'max-age=', response.headers['Cache-Control'], msg="Cache Control max-age not set"
+        )
 
         # decode the qrcode image into the url
         image = io.BytesIO(response.data)

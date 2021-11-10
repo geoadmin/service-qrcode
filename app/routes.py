@@ -10,6 +10,7 @@ from flask import request
 
 from app import app
 from app.helpers.url import validate_url
+from app.settings import CACHE_CONTROL
 from app.version import APP_VERSION
 
 logger = logging.getLogger(__name__)
@@ -39,4 +40,5 @@ def generate_get():
 
     response = make_response(output.getvalue())
     response.headers.set('Content-Type', 'image/png')
+    response.headers.set('Cache-Control', CACHE_CONTROL)
     return response

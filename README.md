@@ -180,3 +180,4 @@ The service is configured by Environment Variable:
 |-------------|-----------------------|----------------------------------------|
 | LOGGING_CFG | `logging-cfg-local.yml` | Logging configuration file           |
 | ALLOWED_DOMAINS | `.*` | Comma separated list of regex that are allowed as domain in Origin header |
+| CACHE_CONTROL | `public, max-age=31536000` | Cache Control header value of the GET /generate endpoint |
