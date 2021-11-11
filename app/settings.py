@@ -18,6 +18,7 @@ if ALLOWED_DOMAINS_STRING is None or ALLOWED_DOMAINS_STRING == "":
     raise RuntimeError("Environment variable $ALLOWED_DOMAINS was not set")
 
 ALLOWED_DOMAINS = ALLOWED_DOMAINS_STRING.split(',')
+ALLOWED_DOMAINS_PATTERN = f"({'|'.join(ALLOWED_DOMAINS)})"
 TRAP_HTTP_EXCEPTIONS = True
 
 CACHE_CONTROL = os.getenv('CACHE_CONTROL', 'public, max-age=31536000')
