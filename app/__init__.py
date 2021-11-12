@@ -11,8 +11,8 @@ from flask import request
 from flask.helpers import url_for
 
 from app import settings
-from app.helpers.utils import ALLOWED_DOMAINS_PATTERN
 from app.helpers.utils import make_error_msg
+from app.settings import ALLOWED_DOMAINS_PATTERN
 from app.settings import CACHE_CONTROL
 from app.settings import CACHE_CONTROL_4XX
 
@@ -52,7 +52,8 @@ def add_cors_header(response):
         re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin'])
     ):
         response.headers['Access-Control-Allow-Origin'] = request.headers['Origin']
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = '*'
     return response
 
 

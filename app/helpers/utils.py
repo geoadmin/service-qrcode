@@ -7,11 +7,7 @@ import yaml
 from flask import jsonify
 from flask import make_response
 
-from app.settings import ALLOWED_DOMAINS
-
 logger = logging.getLogger(__name__)
-
-ALLOWED_DOMAINS_PATTERN = f"({'|'.join(ALLOWED_DOMAINS)})"
 
 
 def make_error_msg(code, msg):

@@ -3,8 +3,8 @@ from urllib.parse import urlparse
 
 from flask import abort
 
-from app.helpers.utils import ALLOWED_DOMAINS_PATTERN
 from app.helpers.utils import logger
+from app.settings import ALLOWED_DOMAINS_PATTERN
 
 
 def validate_url(url):
