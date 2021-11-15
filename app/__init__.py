@@ -47,6 +47,10 @@ def validate_origin():
 # Add CORS Headers to all request
 @app.after_request
 def add_cors_header(response):
+    # Do not add CORS header to internal /checker endpoint.
+    if request.endpoint == 'checker':
+        return response
+
     if (
         'Origin' in request.headers and
         re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin'])
@@ -60,7 +64,7 @@ def add_cors_header(response):
 @app.after_request
 def add_cache_control_header(response):
     # For /checker route we let the frontend proxy decide how to cache it.
-    if request.method == 'GET' and request.path != url_for('check'):
+    if request.method == 'GET' and request.endpoint != 'checker':
         if response.status_code >= 400:
             response.headers.set('Cache-Control', CACHE_CONTROL_4XX)
         else:
