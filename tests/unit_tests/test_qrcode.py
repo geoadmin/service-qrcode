@@ -45,7 +45,7 @@ class QrCodeTests(unittest.TestCase):
         self.assertEqual(response.headers['Access-Control-Allow-Headers'], '*')
 
     def test_checker(self):
-        response = self.app.get(url_for('check'), headers=self.valid_origin_header)
+        response = self.app.get(url_for('checker'), headers=self.valid_origin_header)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn('Cache-Control', response.headers)
         self.assertEqual(response.content_type, "application/json")
