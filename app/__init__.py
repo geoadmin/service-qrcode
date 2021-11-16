@@ -36,11 +36,18 @@ def log_route():
 # Reject request from non allowed origins
 @app.before_request
 def validate_origin():
-    if 'Origin' not in request.headers:
-        logger.error('Origin header is not set')
+    origin = request.headers.get('Origin')
+    referer = request.headers.get('Referer')
+    if origin is None and referer is None:
+        logger.error('Origin and/or Referer header(s) is/are not set')
         abort(403, 'Not allowed')
-    if not re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin']):
-        logger.error('Origin=%s is not allowed', request.headers['Origin'])
+    header = 'Origin'
+    value = origin
+    if origin is None:
+        header = 'Referer'
+        value = referer
+    if not re.match(ALLOWED_DOMAINS_PATTERN, value):
+        logger.error('%s=%s is not allowed', header, value)
         abort(403, 'Not allowed')
 
 
