@@ -100,6 +100,20 @@ class QrCodeTests(unittest.TestCase):
             }
         )
 
+    def test_referer_check(self):
+        response = self.app.get(url_for('generate_get'), headers={'Referer': 'not allowed'})
+        self.assertEqual(
+            response.status_code, 403, msg="Non allowed Referer did not returned an HTTP 403"
+        )
+        response = self.app.get(
+            url_for('generate_get'),
+            query_string={'url': 'https://some_random_domain/test'},
+            headers={'Referer': 'some_random_domain'}
+        )
+        self.assertEqual(
+            response.status_code, 200, msg="Allowed Referer did not returned an HTTP 200"
+        )
+
     def test_generate_domain_restriction(self):
         response = self.app.get(
             url_for('generate_get'),
