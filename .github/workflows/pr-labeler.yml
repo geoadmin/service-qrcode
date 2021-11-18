@@ -5,6 +5,8 @@ on:
     types:
       - opened
       - edited
+      - synchronize
+      - reopened
 
 jobs:
   pr-labeler:
