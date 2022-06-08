@@ -28,8 +28,10 @@ class QrCodeTests(unittest.TestCase):
     def assertCors(self, response, check_origin=True):  # pylint: disable=invalid-name
         if check_origin:
             self.assertIn('Access-Control-Allow-Origin', response.headers)
-            self.assertTrue(
-                re.match(ALLOWED_DOMAINS_PATTERN, response.headers['Access-Control-Allow-Origin'])
+            self.assertIsNotNone(
+                re.match(ALLOWED_DOMAINS_PATTERN, response.headers['Access-Control-Allow-Origin']),
+                msg=f"Access-Control-Allow-Origin={response.headers['Access-Control-Allow-Origin']}"
+                f" doesn't match {ALLOWED_DOMAINS_PATTERN}"
             )
         self.assertIn('Access-Control-Allow-Methods', response.headers)
         self.assertListEqual(
@@ -130,6 +132,19 @@ class QrCodeTests(unittest.TestCase):
 
         response = self.app.get(
             url_for('generate_get'),
+            query_string={'url': 'https://some_random_domain/test'},
+            headers={"Sec-Fetch-Site": "same-origin"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertCors(response)
+        self.assertEqual(response.content_type, "image/png")
+        self.assertIn('Cache-Control', response.headers, msg="Cache control header missing")
+        self.assertIn(
+            'max-age=', response.headers['Cache-Control'], msg="Cache Control max-age not set"
+        )
+
+        response = self.app.get(
+            url_for('generate_get'),
             query_string={'url': 'https://www.example.com/test'},
             headers=self.valid_origin_header
         )
@@ -167,6 +182,22 @@ class QrCodeTests(unittest.TestCase):
                 }, "success": False
             }
         )
+
+        response = self.app.get(
+            url_for('generate_get'),
+            query_string={'url': 'https://www.example.com/test'},
+            headers={"Origin": ""}
+        )
+        self.assertEqual(response.status_code, 403, msg="Domain restriction not applied")
+        self.assertCors(response, check_origin=False)
+
+        response = self.app.get(
+            url_for('generate_get'),
+            query_string={'url': 'https://www.example.com/test'},
+            headers={"Sec-Fetch-Site": ""}
+        )
+        self.assertEqual(response.status_code, 403, msg="Domain restriction not applied")
+        self.assertCors(response, check_origin=False)
 
     def test_generate(self):
         long_string_quoted = "value with space & special character !?"
