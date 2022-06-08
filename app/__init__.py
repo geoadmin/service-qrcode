@@ -36,18 +36,26 @@ def log_route():
 # Reject request from non allowed origins
 @app.before_request
 def validate_origin():
-    origin = request.headers.get('Origin')
-    referer = request.headers.get('Referer')
-    if origin is None and referer is None:
-        logger.error('Origin and/or Referer header(s) is/are not set')
+    # The Origin headers is automatically set by the browser and cannot be changed by the javascript
+    # application. Unfortunately this header is only set if the request comes from another origin.
+    # Sec-Fetch-Site header is set to `same-origin` by most of the browser except by Safari !
+    # The best protection would be to use the Sec-Fetch-Site and Origin header, however this is
+    # not supported by Safari. Therefore we added a fallback to the Referer header for Safari.
+    sec_fetch_site = request.headers.get('Sec-Fetch-Site', None)
+    origin = request.headers.get('Origin', None)
+    referrer = request.headers.get('Referer', None)
+
+    if origin is None and referrer is None and sec_fetch_site is None:
+        logger.error('Referer and/or Origin and/or Sec-Fetch-Site headers not set')
         abort(403, 'Not allowed')
-    header = 'Origin'
-    value = origin
-    if origin is None:
-        header = 'Referer'
-        value = referer
-    if not re.match(ALLOWED_DOMAINS_PATTERN, value):
-        logger.error('%s=%s is not allowed', header, value)
+    if origin is not None and not re.match(ALLOWED_DOMAINS_PATTERN, origin):
+        logger.error('Origin=%s is not allowed', origin)
+        abort(403, 'Not allowed')
+    if referrer is not None and not re.match(ALLOWED_DOMAINS_PATTERN, referrer):
+        logger.error('Referer=%s is not allowed', referrer)
+        abort(403, 'Not allowed')
+    if sec_fetch_site is not None and sec_fetch_site != 'same-origin':
+        logger.error('Sec-Fetch-Site=%s is not allowed', sec_fetch_site)
         abort(403, 'Not allowed')
 
 
@@ -58,11 +66,11 @@ def add_cors_header(response):
     if request.endpoint == 'checker':
         return response
 
-    if (
-        'Origin' in request.headers and
-        re.match(ALLOWED_DOMAINS_PATTERN, request.headers['Origin'])
-    ):
+    if 'Origin' in request.headers:
         response.headers['Access-Control-Allow-Origin'] = request.headers['Origin']
+    else:
+        response.headers['Access-Control-Allow-Origin'] = request.host_url
+    response.headers['Vary'] = 'Origin'
     response.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
     response.headers['Access-Control-Allow-Headers'] = '*'
     return response
