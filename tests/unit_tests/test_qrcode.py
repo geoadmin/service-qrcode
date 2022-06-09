@@ -25,14 +25,13 @@ class QrCodeTests(unittest.TestCase):
             'Origin': 'some_random_domain'
         }
 
-    def assertCors(self, response, check_origin=True):  # pylint: disable=invalid-name
-        if check_origin:
-            self.assertIn('Access-Control-Allow-Origin', response.headers)
-            self.assertIsNotNone(
-                re.match(ALLOWED_DOMAINS_PATTERN, response.headers['Access-Control-Allow-Origin']),
-                msg=f"Access-Control-Allow-Origin={response.headers['Access-Control-Allow-Origin']}"
-                f" doesn't match {ALLOWED_DOMAINS_PATTERN}"
-            )
+    def assertCors(self, response):  # pylint: disable=invalid-name
+        self.assertIn('Access-Control-Allow-Origin', response.headers)
+        self.assertIsNotNone(
+            re.match(ALLOWED_DOMAINS_PATTERN, response.headers['Access-Control-Allow-Origin']),
+            msg=f"Access-Control-Allow-Origin={response.headers['Access-Control-Allow-Origin']}"
+            f" doesn't match {ALLOWED_DOMAINS_PATTERN}"
+        )
         self.assertIn('Access-Control-Allow-Methods', response.headers)
         self.assertListEqual(
             sorted(['GET', 'HEAD', 'OPTIONS']),
@@ -56,7 +55,7 @@ class QrCodeTests(unittest.TestCase):
     def test_generate_errors(self):
         response = self.app.get(url_for('generate_get'))
         self.assertEqual(response.status_code, 403, msg="ORIGIN must be set")
-        self.assertCors(response, check_origin=False)
+        self.assertCors(response)
         self.assertIn('Cache-Control', response.headers, msg="Cache control header missing")
         self.assertIn(
             'max-age=', response.headers['Cache-Control'], msg="Cache Control max-age not set"
@@ -169,7 +168,7 @@ class QrCodeTests(unittest.TestCase):
             headers={"Origin": "www.example.com"}
         )
         self.assertEqual(response.status_code, 403, msg="Domain restriction not applied")
-        self.assertCors(response, check_origin=False)
+        self.assertCors(response)
         self.assertIn('Cache-Control', response.headers, msg="Cache control header missing")
         self.assertIn(
             'max-age=', response.headers['Cache-Control'], msg="Cache Control max-age not set"
@@ -189,7 +188,7 @@ class QrCodeTests(unittest.TestCase):
             headers={"Origin": ""}
         )
         self.assertEqual(response.status_code, 403, msg="Domain restriction not applied")
-        self.assertCors(response, check_origin=False)
+        self.assertCors(response)
 
         response = self.app.get(
             url_for('generate_get'),
@@ -197,7 +196,7 @@ class QrCodeTests(unittest.TestCase):
             headers={"Sec-Fetch-Site": ""}
         )
         self.assertEqual(response.status_code, 403, msg="Domain restriction not applied")
-        self.assertCors(response, check_origin=False)
+        self.assertCors(response)
 
     def test_generate(self):
         long_string_quoted = "value with space & special character !?"
