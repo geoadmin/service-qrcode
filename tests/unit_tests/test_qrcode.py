@@ -3,6 +3,7 @@ import re
 import unittest
 from urllib.parse import quote
 
+from nose2.tools import params
 from PIL import Image
 from pyzbar import pyzbar
 
@@ -64,7 +65,7 @@ class QrCodeTests(unittest.TestCase):
         self.assertEqual(
             response.json, {
                 "error": {
-                    "code": 403, "message": "Not allowed"
+                    "code": 403, "message": "Permission denied"
                 }, "success": False
             }
         )
@@ -115,33 +116,7 @@ class QrCodeTests(unittest.TestCase):
             response.status_code, 200, msg="Allowed Referer did not returned an HTTP 200"
         )
 
-    def test_generate_domain_restriction(self):
-        response = self.app.get(
-            url_for('generate_get'),
-            query_string={'url': 'https://some_random_domain/test'},
-            headers=self.valid_origin_header
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertCors(response)
-        self.assertEqual(response.content_type, "image/png")
-        self.assertIn('Cache-Control', response.headers, msg="Cache control header missing")
-        self.assertIn(
-            'max-age=', response.headers['Cache-Control'], msg="Cache Control max-age not set"
-        )
-
-        response = self.app.get(
-            url_for('generate_get'),
-            query_string={'url': 'https://some_random_domain/test'},
-            headers={"Sec-Fetch-Site": "same-origin"}
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertCors(response)
-        self.assertEqual(response.content_type, "image/png")
-        self.assertIn('Cache-Control', response.headers, msg="Cache control header missing")
-        self.assertIn(
-            'max-age=', response.headers['Cache-Control'], msg="Cache Control max-age not set"
-        )
-
+    def test_generate_url_domain_restriction(self):
         response = self.app.get(
             url_for('generate_get'),
             query_string={'url': 'https://www.example.com/test'},
@@ -162,10 +137,25 @@ class QrCodeTests(unittest.TestCase):
             }
         )
 
+    @params(
+        None,
+        {'Origin': 'www.example'},
+        {
+            'Origin': 'www.example', 'Sec-Fetch-Site': 'cross-site'
+        },
+        {
+            'Origin': 'www.example', 'Sec-Fetch-Site': 'same-site'
+        },
+        {
+            'Origin': 'www.example', 'Sec-Fetch-Site': 'same-origin'
+        },
+        {'Referer': 'http://www.example'},
+    )
+    def test_generate_origin_not_allowed(self, headers):
         response = self.app.get(
             url_for('generate_get'),
-            query_string={'url': 'https://www.example.com/test'},
-            headers={"Origin": "www.example.com"}
+            query_string={'url': 'https://some_random_domain/test'},
+            headers=headers
         )
         self.assertEqual(response.status_code, 403, msg="Domain restriction not applied")
         self.assertCors(response)
@@ -177,26 +167,38 @@ class QrCodeTests(unittest.TestCase):
         self.assertEqual(
             response.json, {
                 "error": {
-                    "code": 403, "message": "Not allowed"
+                    "code": 403, "message": "Permission denied"
                 }, "success": False
             }
         )
 
+    @params(
+        {'Origin': 'map.geo.admin.ch'},
+        {
+            'Origin': 'map.geo.admin.ch', 'Sec-Fetch-Site': 'same-site'
+        },
+        {
+            'Origin': 'public.geo.admin.ch', 'Sec-Fetch-Site': 'same-origin'
+        },
+        {
+            'Origin': 'http://localhost', 'Sec-Fetch-Site': 'cross-site'
+        },
+        {'Sec-Fetch-Site': 'same-origin'},
+        {'Referer': 'https://map.geo.admin.ch'},
+    )
+    def test_generate_origin_allowed(self, headers):
         response = self.app.get(
             url_for('generate_get'),
-            query_string={'url': 'https://www.example.com/test'},
-            headers={"Origin": ""}
+            query_string={'url': 'https://some_random_domain/test'},
+            headers=headers
         )
-        self.assertEqual(response.status_code, 403, msg="Domain restriction not applied")
+        self.assertEqual(response.status_code, 200)
         self.assertCors(response)
-
-        response = self.app.get(
-            url_for('generate_get'),
-            query_string={'url': 'https://www.example.com/test'},
-            headers={"Sec-Fetch-Site": ""}
+        self.assertEqual(response.content_type, "image/png")
+        self.assertIn('Cache-Control', response.headers, msg="Cache control header missing")
+        self.assertIn(
+            'max-age=', response.headers['Cache-Control'], msg="Cache Control max-age not set"
         )
-        self.assertEqual(response.status_code, 403, msg="Domain restriction not applied")
-        self.assertCors(response)
 
     def test_generate(self):
         long_string_quoted = "value with space & special character !?"
