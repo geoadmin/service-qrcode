@@ -10,7 +10,7 @@ gunicorn = "~=19.9.0"
 Flask = "~=2.0"
 Pillow = "~=9.1"
 qrcode = "~=7.3"
-logging-utilities = ">=1.2.3,~=1.2"
+logging-utilities = "~=3.0"
 python-dotenv = "~=0.19"
 
 [dev-packages]
