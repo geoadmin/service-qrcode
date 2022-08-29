@@ -8,9 +8,9 @@ PyYAML = "~=5.4"
 gevent = "~=20.9.0"
 gunicorn = "~=19.9.0"
 Flask = "~=2.0"
-Pillow = "~=9.1" # required by qrcode but not in its dependencies
+Pillow = "~=9.1"
 qrcode = "~=7.3"
-logging-utilities = ">=1.2.3,~=1.2"
+logging-utilities = "~=3.0"
 python-dotenv = "~=0.19"
 
 [dev-packages]
@@ -19,6 +19,8 @@ nose2 = "*"
 pylint = "*"
 pylint-flask = "*"
 pyzbar = "*"
+click = "*"
+pipenv-shebang = "*"
 
 [requires]
 python_version = "3.9"
