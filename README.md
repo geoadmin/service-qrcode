@@ -139,7 +139,6 @@ Each image contains the following metadata:
 These metadata can be read with the following command
 
 ```bash
-# NOTE: Currently we don't have permission to do docker pull on AWS ECR
 make dockerlogin
 docker pull 974517877189.dkr.ecr.eu-central-1.amazonaws.com/service-qrcode:develop.latest
 
