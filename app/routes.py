@@ -8,7 +8,7 @@ from flask import jsonify
 from flask import make_response
 from flask import request
 
-from app import app
+from app.app import app
 from app.helpers.url import validate_url
 from app.version import APP_VERSION
 
