@@ -9,7 +9,7 @@ from pyzbar import pyzbar
 
 from flask import url_for
 
-from app import app
+from app.app import app
 from app.settings import ALLOWED_DOMAINS_PATTERN
 from app.version import APP_VERSION
 
