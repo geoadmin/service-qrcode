@@ -5,7 +5,6 @@ import time
 from werkzeug.exceptions import HTTPException
 
 from flask import Flask
-from flask import abort
 from flask import g
 from flask import request
 
@@ -36,64 +35,24 @@ def log_route():
     route_logger.info('%s %s', request.method, request.path)
 
 
-# Reject request from non allowed origins
-@app.before_request
-def validate_origin():
-    # The Origin headers is automatically set by the browser and cannot be changed by the javascript
-    # application. Unfortunately this header is only set if the request comes from another origin.
-    # Sec-Fetch-Site header is set to `same-origin` by most of the browser except by Safari !
-    # The best protection would be to use the Sec-Fetch-Site and Origin header, however this is
-    # not supported by Safari. Therefore we added a fallback to the Referer header for Safari.
-    sec_fetch_site = request.headers.get('Sec-Fetch-Site', None)
-    origin = request.headers.get('Origin', None)
-    referrer = request.headers.get('Referer', None)
-
-    logger.debug(
-        "Validate origin: sec_fetch_site=%s, origin=%s, referrer=%s",
-        sec_fetch_site,
-        origin,
-        referrer
-    )
-
-    if origin is not None:
-        if is_domain_allowed(origin):
-            return
-        logger.error('Origin=%s does not match %s', origin, ALLOWED_DOMAINS_PATTERN)
-        abort(403, 'Permission denied')
-
-    # BGDIINF_SB-3115: Apparently IOS 16 has a bug and set Sec-Fetch-Site=cross-site even if the
-    # request is originated (same origin and/or referrer) from the same site ! Therefore to avoid
-    # issue on IOS we first checks the referrer before checking Sec-Fetch-Site even if this not
-    # correct.
-    if referrer is not None:
-        if is_domain_allowed(referrer):
-            return
-        logger.error('Referer=%s does not match %s', referrer, ALLOWED_DOMAINS_PATTERN)
-        abort(403, 'Permission denied')
-
-    if sec_fetch_site is not None:
-        if sec_fetch_site in ['same-origin', 'same-site']:
-            return
-        logger.error('Sec-Fetch-Site=%s is not allowed', sec_fetch_site)
-        abort(403, 'Permission denied')
-
-    logger.error('Referer and/or Origin and/or Sec-Fetch-Site headers not set')
-    abort(403, 'Permission denied')
-
-
 # Add CORS Headers to all request
 @app.after_request
 def add_cors_header(response):
-    # Do not add CORS header to internal /checker endpoint.
-    if request.endpoint == 'checker':
-        return response
-
-    response.headers['Access-Control-Allow-Origin'] = request.host_url
+    # Only add CORS header if an origin or referer header is present in request
+    # is a host part of our whitelist
+    cors_origin = None
     if 'Origin' in request.headers and is_domain_allowed(request.headers['Origin']):
-        response.headers['Access-Control-Allow-Origin'] = request.headers['Origin']
-    response.headers['Vary'] = 'Origin'
-    response.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
-    response.headers['Access-Control-Allow-Headers'] = '*'
+        cors_origin = request.headers['Origin']
+
+    if 'Referer' in request.headers and is_domain_allowed(request.headers['Referer']):
+        cors_origin = request.headers['Referer']
+
+    if cors_origin:
+        response.headers['Access-Control-Allow-Origin'] = cors_origin
+        response.headers['Vary'] = 'Origin'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, HEAD, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = '*'
+
     return response
 
 

@@ -46,6 +46,11 @@ class QrCodeTests(unittest.TestCase):
         self.assertIn('Access-Control-Allow-Headers', response.headers)
         self.assertEqual(response.headers['Access-Control-Allow-Headers'], '*')
 
+    def assertNoCors(self, response):  # pylint: disable=invalid-name
+        self.assertNotIn('Access-Control-Allow-Origin', response.headers)
+        self.assertNotIn('Access-Control-Allow-Methods', response.headers)
+        self.assertNotIn('Access-Control-Allow-Headers', response.headers)
+
     def test_checker(self):
         response = self.app.get(url_for('checker'), headers=self.valid_origin_header)
         self.assertEqual(response.status_code, 200)
@@ -54,21 +59,6 @@ class QrCodeTests(unittest.TestCase):
         self.assertEqual(response.json, {"message": "OK", "success": True, "version": APP_VERSION})
 
     def test_generate_errors(self):
-        response = self.app.get(url_for('generate_get'))
-        self.assertEqual(response.status_code, 403, msg="ORIGIN must be set")
-        self.assertCors(response)
-        self.assertIn('Cache-Control', response.headers, msg="Cache control header missing")
-        self.assertIn(
-            'max-age=', response.headers['Cache-Control'], msg="Cache Control max-age not set"
-        )
-        self.assertEqual(response.content_type, "application/json")
-        self.assertEqual(
-            response.json, {
-                "error": {
-                    "code": 403, "message": "Permission denied"
-                }, "success": False
-            }
-        )
         response = self.app.post(url_for('generate_get'), headers=self.valid_origin_header)
         self.assertEqual(response.status_code, 405, msg="POST method is not allowed")
         self.assertCors(response)
@@ -102,11 +92,15 @@ class QrCodeTests(unittest.TestCase):
             }
         )
 
-    def test_referer_check(self):
-        response = self.app.get(url_for('generate_get'), headers={'Referer': 'not allowed'})
-        self.assertEqual(
-            response.status_code, 403, msg="Non allowed Referer did not returned an HTTP 403"
+    def test_no_origin_allowed(self):
+        response = self.app.get(
+            url_for('generate_get'),
+            query_string={'url': 'https://some_random_domain/test'},
         )
+        self.assertEqual(response.status_code, 200)
+        self.assertNoCors(response)
+
+    def test_referer_check(self):
         response = self.app.get(
             url_for('generate_get'),
             query_string={'url': 'https://some_random_domain/test'},
@@ -115,6 +109,7 @@ class QrCodeTests(unittest.TestCase):
         self.assertEqual(
             response.status_code, 200, msg="Allowed Referer did not returned an HTTP 200"
         )
+        self.assertCors(response)
 
     def test_generate_url_domain_restriction(self):
         response = self.app.get(
@@ -157,20 +152,12 @@ class QrCodeTests(unittest.TestCase):
             query_string={'url': 'https://some_random_domain/test'},
             headers=headers
         )
-        self.assertEqual(response.status_code, 403, msg="Domain restriction not applied")
-        self.assertCors(response)
+        self.assertNoCors(response)
         self.assertIn('Cache-Control', response.headers, msg="Cache control header missing")
         self.assertIn(
             'max-age=', response.headers['Cache-Control'], msg="Cache Control max-age not set"
         )
-        self.assertEqual(response.content_type, "application/json")
-        self.assertEqual(
-            response.json, {
-                "error": {
-                    "code": 403, "message": "Permission denied"
-                }, "success": False
-            }
-        )
+        self.assertEqual(response.status_code, 200)
 
     @params(
         {'Origin': 'map.geo.admin.ch'},
@@ -183,7 +170,6 @@ class QrCodeTests(unittest.TestCase):
         {
             'Origin': 'http://localhost', 'Sec-Fetch-Site': 'cross-site'
         },
-        {'Sec-Fetch-Site': 'same-origin'},
         {'Referer': 'https://map.geo.admin.ch'},
     )
     def test_generate_origin_allowed(self, headers):
