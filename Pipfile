@@ -4,14 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-PyYAML = "~=5.4"
-gevent = "~=20.9.0"
-gunicorn = "~=19.9.0"
-Flask = "~=2.0"
-Pillow = "~=9.1"
-qrcode = "~=7.3"
-logging-utilities = "~=3.0"
-python-dotenv = "~=0.19"
+PyYAML = "~=6.0.2"
+gevent = "~=24.2.1"
+gunicorn = "~=23.0.0"
+Flask = "~=3.0.3"
+Pillow = "~=10.4.0"
+qrcode = "~=7.4"
+logging-utilities = "~=4.4.1"
+python-dotenv = "~=1.0.1"
 
 [dev-packages]
 yapf = "*"
@@ -23,4 +23,4 @@ click = "*"
 pipenv-shebang = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.12"

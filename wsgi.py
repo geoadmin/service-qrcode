@@ -2,7 +2,7 @@ import os
 
 from gunicorn.app.base import BaseApplication
 
-from app import app as application
+from app.app import app as application
 from app.helpers.utils import get_logging_cfg
 
 

@@ -2,8 +2,8 @@
 
 | Branch | Status |
 |--------|-----------|
-| develop | ![Build Status](https://codebuild.eu-central-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoibVJMdm9sbXA4cU1YcWtFMml1UVQwQ2tmdzQ3Z0ZsOFBjVDlsb1NNNTFwZURlWE9qdENiVytId0VzVkJpblBvTmxqVEllSEt0cnlVcXNNR2pqRTNESjRNPSIsIml2UGFyYW1ldGVyU3BlYyI6IkdsNE1FbkZka0hqTFFscjAiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=develop) |
-| master | ![Build Status](https://codebuild.eu-central-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoibVJMdm9sbXA4cU1YcWtFMml1UVQwQ2tmdzQ3Z0ZsOFBjVDlsb1NNNTFwZURlWE9qdENiVytId0VzVkJpblBvTmxqVEllSEt0cnlVcXNNR2pqRTNESjRNPSIsIml2UGFyYW1ldGVyU3BlYyI6IkdsNE1FbkZka0hqTFFscjAiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master) |
+| develop | ![Build Status](https://codebuild.eu-central-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiRS9LWUtEMWtjbThGbmt5OC9DWlJkZ2l0M096NWpuc3grZkRtek85QUpUSUMvZ1NHWUN3QXJWdzdpb0c2OGtXMTFkYVpyUzJvcEtxN2xoUmxwUlZIbU9RPSIsIml2UGFyYW1ldGVyU3BlYyI6InhaRHVOdjhYRW84T2FIRUsiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=develop) |
+| master | ![Build Status](https://codebuild.eu-central-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiRS9LWUtEMWtjbThGbmt5OC9DWlJkZ2l0M096NWpuc3grZkRtek85QUpUSUMvZ1NHWUN3QXJWdzdpb0c2OGtXMTFkYVpyUzJvcEtxN2xoUmxwUlZIbU9RPSIsIml2UGFyYW1ldGVyU3BlYyI6InhaRHVOdjhYRW84T2FIRUsiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master) |
 
 ## Table of content
 
@@ -139,7 +139,6 @@ Each image contains the following metadata:
 These metadata can be read with the following command
 
 ```bash
-# NOTE: Currently we don't have permission to do docker pull on AWS ECR
 make dockerlogin
 docker pull 974517877189.dkr.ecr.eu-central-1.amazonaws.com/service-qrcode:develop.latest
 
