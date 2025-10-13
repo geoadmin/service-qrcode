@@ -4,6 +4,7 @@ from gunicorn.app.base import BaseApplication
 
 from app.app import app as application
 from app.helpers.utils import get_logging_cfg
+from app.settings import GUNICORN_KEEPALIVE
 
 
 class StandaloneApplication(BaseApplication):  # pylint: disable=abstract-method
@@ -34,6 +35,7 @@ if __name__ == '__main__':
         'worker_class': 'gevent',
         'workers': 2,  # scaling horizontally is left to Kubernetes
         'timeout': 60,
+        'keepalive': GUNICORN_KEEPALIVE,
         'logconfig_dict': get_logging_cfg()
     }
     StandaloneApplication(application, options).run()

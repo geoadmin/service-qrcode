@@ -181,3 +181,4 @@ The service is configured by Environment Variable:
 | ALLOWED_DOMAINS | `.*` | Comma separated list of regex that are allowed as domain in Origin header |
 | CACHE_CONTROL | `public, max-age=31536000` | Cache Control header value of the GET /generate endpoint |
 | CACHE_CONTROL_4XX | `public, max-age=3600` | Cache Control header for 4XX responses |
+| GUNICORN_KEEPALIVE | `2` | The [`keepalive`](https://docs.gunicorn.org/en/stable/settings.html#keepalive) setting passed to gunicorn. |
