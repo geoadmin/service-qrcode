@@ -28,11 +28,11 @@ import os
 from gunicorn.app.base import BaseApplication
 
 from app.app import app as application
+from app.helpers import otel
 from app.helpers.utils import get_logging_cfg
+from app.helpers.utils import strtobool
 from app.settings import GUNICORN_KEEPALIVE
 
-from app.helpers.utils import strtobool
-from app.helpers import otel
 
 def post_fork(server, worker):
     server.log.info("Worker spawned (pid: %s)", worker.pid)
@@ -40,6 +40,7 @@ def post_fork(server, worker):
     # Setup OTEL providers for this worker
     if not strtobool(os.getenv("OTEL_SDK_DISABLED", "false")):
         otel.setup_trace_provider(worker.pid)
+
 
 class StandaloneApplication(BaseApplication):  # pylint: disable=abstract-method
 
@@ -50,14 +51,16 @@ class StandaloneApplication(BaseApplication):  # pylint: disable=abstract-method
 
     def load_config(self):
         config = {
-            key: value for key,
-            value in self.options.items() if key in self.cfg.settings and value is not None
+            key: value
+            for key, value in self.options.items()
+            if key in self.cfg.settings and value is not None
         }
         for key, value in config.items():
             self.cfg.set(key.lower(), value)
 
     def load(self):
         return self.application
+
 
 # We use the port 5000 as default, otherwise we set the HTTP_PORT env variable within the container.
 if __name__ == '__main__':

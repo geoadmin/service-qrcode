@@ -9,6 +9,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 from app.helpers.utils import strtobool
 
+
 def setup_trace_provider(worker_pid):
     trace.set_tracer_provider(TracerProvider(resource=Resource.create()))
 
