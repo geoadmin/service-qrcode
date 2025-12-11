@@ -1,3 +1,18 @@
+"""
+    The gevent monkey import and patch suppress a warning, and a potential problem.
+    Gunicorn would call it anyway, but if it tries to call it after the ssl module
+    has been initialized in another module (like, in our code, by the botocore library),
+    then it could lead to inconsistencies in how the ssl module is used. Thus we patch
+    the ssl module through gevent.monkey.patch_all before any other import, especially
+    the app import, which would cause the boto module to be loaded, which would in turn
+    load the ssl module.
+"""
+
+# pylint: disable=wrong-import-position,wrong-import-order
+import gevent.monkey
+
+gevent.monkey.patch_all()
+
 # Initialize OTEL.
 # Initialize should be called as early as possible, but at least before the app is imported
 # The order has a impact on how the libraries are instrumented. If called after app import,
