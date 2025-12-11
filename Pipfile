@@ -13,6 +13,12 @@ qrcode = "~=7.4"
 logging-utilities = "~=4.4.1"
 python-dotenv = "~=1.0.1"
 
+# OpenTelemetry packages
+opentelemetry-sdk = "*"
+opentelemetry-exporter-otlp = "*"
+opentelemetry-instrumentation-flask = "*"
+opentelemetry-instrumentation-requests = "*"
+
 [dev-packages]
 yapf = "*"
 nose2 = "*"
