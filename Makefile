@@ -148,7 +148,7 @@ serve: clean_logs $(LOGS_DIR)
 
 .PHONY: gunicornserve
 gunicornserve: clean_logs $(LOGS_DIR)
-	OTEL_SDK_DISABLED=true SCRIPT_NAME=$(ROUTE_PREFIX) ENV_FILE=$(ENV_FILE) LOGS_DIR=$(LOGS_DIR) $(PYTHON) wsgi.py
+	SCRIPT_NAME=$(ROUTE_PREFIX) ENV_FILE=$(ENV_FILE) LOGS_DIR=$(LOGS_DIR) $(PYTHON) wsgi.py
 
 
 # Docker related functions.

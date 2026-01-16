@@ -8,7 +8,7 @@
     load the ssl module.
 """
 
-# pylint: disable=wrong-import-position,wrong-import-order
+# pylint: disable=wrong-import-position,wrong-import-order,ungrouped-imports
 import gevent.monkey
 
 gevent.monkey.patch_all()
@@ -19,7 +19,9 @@ gevent.monkey.patch_all()
 # e.g. the flask instrumentation has no effect. See:
 # https://github.com/open-telemetry/opentelemetry.io/blob/main/content/en/docs/zero-code/python/troubleshooting.md#use-programmatic-auto-instrumentation
 
-from opentelemetry.instrumentation.auto_instrumentation import initialize
+from app.helpers.otel import initialize
+from app.helpers.otel import initialize_flask
+from app.helpers.otel import setup_trace_provider
 
 initialize()
 
@@ -28,18 +30,17 @@ import os
 from gunicorn.app.base import BaseApplication
 
 from app.app import app as application
-from app.helpers import otel
 from app.helpers.utils import get_logging_cfg
-from app.helpers.utils import strtobool
 from app.settings import GUNICORN_KEEPALIVE
+
+initialize_flask(application)
 
 
 def post_fork(server, worker):
     server.log.info("Worker spawned (pid: %s)", worker.pid)
 
     # Setup OTEL providers for this worker
-    if not strtobool(os.getenv("OTEL_SDK_DISABLED", "false")):
-        otel.setup_trace_provider(worker.pid)
+    setup_trace_provider()
 
 
 class StandaloneApplication(BaseApplication):  # pylint: disable=abstract-method
