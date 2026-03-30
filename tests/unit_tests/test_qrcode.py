@@ -114,7 +114,7 @@ class QrCodeTests(unittest.TestCase):
     def test_generate_url_domain_restriction(self):
         response = self.app.get(
             url_for('generate_get'),
-            query_string={'url': 'https://www.example.com/test'},
+            query_string={'url': 'https://map.geo.admin.ch.attacker.com/test/lore/ipsum'},
             headers=self.valid_origin_header
         )
         self.assertEqual(response.status_code, 400, msg="Domain restriction not applied")
@@ -134,17 +134,17 @@ class QrCodeTests(unittest.TestCase):
 
     @params(
         None,
-        {'Origin': 'www.example'},
+        {'Origin': 'www.example.com'},
         {
-            'Origin': 'www.example', 'Sec-Fetch-Site': 'cross-site'
+            'Origin': 'www.example.com', 'Sec-Fetch-Site': 'cross-site'
         },
         {
-            'Origin': 'www.example', 'Sec-Fetch-Site': 'same-site'
+            'Origin': 'www.example.com', 'Sec-Fetch-Site': 'same-site'
         },
         {
-            'Origin': 'www.example', 'Sec-Fetch-Site': 'same-origin'
+            'Origin': 'www.example.com', 'Sec-Fetch-Site': 'same-origin'
         },
-        {'Referer': 'http://www.example'},
+        {'Referer': 'http://www.example.com'},
     )
     def test_generate_origin_not_allowed(self, headers):
         response = self.app.get(

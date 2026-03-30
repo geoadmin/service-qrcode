@@ -67,6 +67,7 @@ help:
 	@echo -e " \033[1mSetup TARGETS\033[0m "
 	@echo "- setup              Create the python virtual environment with developper tools and activate it"
 	@echo "- ci                 Create the python virtual environment and install requirements based on the Pipfile.lock"
+	@echo "- otelrequirements   Get a list of available otel instrumentation libraries to add to the pipfile of this project"
 	@echo -e " \033[1mFORMATING, LINTING AND TESTING TOOLS TARGETS\033[0m "
 	@echo "- format             Format the python source code"
 	@echo "- lint               Lint the python source code"
@@ -99,6 +100,9 @@ ci: $(REQUIREMENTS)
 	# Create virtual env with all packages for development using the Pipfile.lock
 	pipenv sync --dev
 
+.PHONY: otelrequirements
+otelrequirements:
+	edot-bootstrap --action=requirements
 
 # linting target, calls upon yapf to make sure your code is easier to read and respects some conventions.
 

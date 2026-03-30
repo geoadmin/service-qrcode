@@ -32,7 +32,7 @@ def validate_url(url):
         logger.error('Invalid URL, could not determine the hostname, url=%s', url)
         abort(400, 'Invalid URL, could not determine the hostname')
 
-    if not re.match(ALLOWED_DOMAINS_PATTERN, result.hostname):
+    if not re.fullmatch(ALLOWED_DOMAINS_PATTERN, result.hostname):
         logger.error('URL domain not allowed: %s', result.hostname)
         abort(400, 'URL domain not allowed')
 
